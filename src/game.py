@@ -20,18 +20,27 @@ screen_width, screen_height = screen.get_size()
 
 # Crée un nouvel événement personnalisé pour signaler la fin du chargement
 END_LOADING = pygame.USEREVENT +1
+selected_level = 'Easy'
+selected_difficulty = 'Easy'
 
-#def level_selection():
- #   menu._open(world)
+def level_selection():
+    menu._open(world)
+
+#def set_level(value, level):
+
 
 def set_diffulty(value, difficulty):
-    print(value)
-    print(difficulty)
+    global selected_level
+    selected_level = level
+    print(f"Level selected = {selected_level}")
+
+    #print(value)
+    #print(difficulty)
 
 def start_game():
+    print(f"Starting game with level : {selected_level}")
     menu._open(loading)
     pygame.time.set_timer(update_loading, 30)
-
     # Définir un temps après lequel le chargement est terminé (ex: 3 secondes)
     pygame.time.set_timer(END_LOADING, 3000)  # 3000 ms = 3 secondes
 
@@ -47,7 +56,7 @@ def create_menu():
     )
 
     menu.add.text_input('Name : ', default="username",)
-    menu.add.button('Play', start_game)
+    menu.add.button('Play', level_selection)
     menu.add.button('Levels', level_menu)
     menu.add.button('Quit', pygame_menu.events.EXIT)
 
@@ -65,8 +74,9 @@ update_loading = pygame.USEREVENT + 0
 arrow = pygame_menu.widgets.LeftArrowSelection(arrow_size = (10, 15))
 
 world = pygame_menu.Menu("Choose your level...", 1400, 800, theme=themes.THEME_SOLARIZED)
-world.add.selector('Level: ', ['Easy', 'Medium', 'Hard'])
+world.add.selector('Level: ', [('Easy','Easy'), ('Medium', 'Medium'), ('Hard','Hard')], onchange=set_difficulty)
 world.add.button("Back", pygame_menu.events.BACK)
+world.add.button("Start Game", start_game)
 
 
 
