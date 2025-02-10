@@ -7,6 +7,7 @@ from pygame_menu.examples.simple import start_the_game, set_difficulty
 
 from src import entities
 from src.entities import *
+from src.environment import *
 
 pygame.init()
 #setup pygame
@@ -127,11 +128,11 @@ while run:
             arrow.draw(screen, menu.get_current().get_selected_widget())
 
     # Enemy AI: Move towards the player
-    #enemy.move_towards_player(player1)
+    enemy.move_towards_player(player1)
 
     #pygame.draw.rect(window, (255,0,0), player)
-    #player1.draw(screen)
-    #enemy.draw(screen)
-    #health_bar.draw(screen)
+    player1.draw(screen)
+    enemy.draw(screen)
+    health_bar.draw(screen)
 
     pygame.display.update()
