@@ -11,6 +11,7 @@ from src.entities import *
 pygame.init()
 #setup pygame
 screen = pygame.display.set_mode((1400, 800),pygame.RESIZABLE)
+x,y = screen.get_size()
 
 #setup window's title
 pygame.display.set_caption("Plateformer")
@@ -81,14 +82,13 @@ world.add.selector('Level: ', [('Easy','Easy'), ('Medium', 'Medium'), ('Hard','H
 world.add.button("Back", pygame_menu.events.BACK)
 world.add.button("Start Game", start_game)
 
+player1 = Player(100, 100, 50, 50)
+enemy = Enemy(200, 200, 50, 50)
 
-
+health_bar = HealthBar(250,200,300,40,100)
 
 run = True
 while run:
-
-    player1 = entities.Player(player1)
-    enemy = entities(enemy)
 
     events = pygame.event.get()
 
@@ -106,8 +106,8 @@ while run:
         print("collision")
 
     # draw health bar
-    health_bar.hp = 50
-    health_bar.draw(screen)
+    #health_bar.hp = 50
+    #health_bar.draw(screen)
 
     for event in events:
         if event.type == update_loading:
@@ -127,10 +127,11 @@ while run:
             arrow.draw(screen, menu.get_current().get_selected_widget())
 
     # Enemy AI: Move towards the player
-    enemy.move_towards_player(player1)
+    #enemy.move_towards_player(player1)
 
     #pygame.draw.rect(window, (255,0,0), player)
-    player1.draw(screen)
-    enemy.draw(screen)
+    #player1.draw(screen)
+    #enemy.draw(screen)
+    #health_bar.draw(screen)
 
     pygame.display.update()

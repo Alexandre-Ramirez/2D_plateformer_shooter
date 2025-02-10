@@ -1,10 +1,6 @@
 import pygame
 import math
 
-from src.game import screen
-
-
-
 class Player():
     def __init__(self, x, y, width, height):
         self.x = x
@@ -154,16 +150,4 @@ class Collide_damage():
 
 pygame.init()
 
-x,y = screen.get_size()
-
-player_x, player_y = 100, 100
-player_w, player_h = 50, 50
-
 velocity = 12
-
-enemy_w, enemy_h = 50, 50
-
-player1 = Player(x, y, player_w, player_h)
-enemy = Enemy(x, y, enemy_w, enemy_h)
-
-health_bar = HealthBar(250,200,300,40,100)
