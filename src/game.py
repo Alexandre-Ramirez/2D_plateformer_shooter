@@ -5,6 +5,9 @@ import pygame_menu
 from pygame_menu import themes
 from pygame_menu.examples.simple import start_the_game, set_difficulty
 
+from src import entities
+from src.entities import *
+
 pygame.init()
 #setup pygame
 screen = pygame.display.set_mode((1400, 800),pygame.RESIZABLE)
@@ -84,7 +87,27 @@ world.add.button("Start Game", start_game)
 run = True
 while run:
 
+    player1 = entities.Player(player1)
+    enemy = entities(enemy)
+
     events = pygame.event.get()
+
+    key = pygame.key.get_pressed()
+    if key[pygame.K_LEFT]:
+        player1.move(-player1.velocity, 0)
+    if key[pygame.K_RIGHT]:
+        player1.move(player1.velocity, 0)
+    if key[pygame.K_UP]:
+        player1.move(0, -player1.velocity)
+    if key[pygame.K_DOWN]:
+        player1.move(0, player1.velocity)
+
+    if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
+        print("collision")
+
+    # draw health bar
+    health_bar.hp = 50
+    health_bar.draw(screen)
 
     for event in events:
         if event.type == update_loading:
@@ -102,5 +125,12 @@ while run:
         menu.draw(screen)
         if (menu.get_current().get_selected_widget()):
             arrow.draw(screen, menu.get_current().get_selected_widget())
+
+    # Enemy AI: Move towards the player
+    enemy.move_towards_player(player1)
+
+    #pygame.draw.rect(window, (255,0,0), player)
+    player1.draw(screen)
+    enemy.draw(screen)
 
     pygame.display.update()
