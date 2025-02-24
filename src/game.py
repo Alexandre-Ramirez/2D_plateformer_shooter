@@ -102,8 +102,8 @@ while run:
     if key[pygame.K_DOWN]:
         player1.move(0, player1.velocity)
 
-    if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
-        print("collision")
+    #if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
+        #print("collision")
 
     # draw health bar
     #health_bar.hp = 50
@@ -126,8 +126,8 @@ while run:
         if (menu.get_current().get_selected_widget()):
             arrow.draw(screen, menu.get_current().get_selected_widget())
 
-    # Enemy AI: Move towards the player
-    #enemy.move_towards_player(player1)
+    #Enemy AI: Move towards the player
+    enemy.move_towards_player(player1)
 
     #pygame.draw.rect(window, (255,0,0), player)
     #player1.draw(screen)
