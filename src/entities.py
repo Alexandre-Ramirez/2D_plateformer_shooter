@@ -1,5 +1,8 @@
+import sys
+
 import pygame
 import math
+screen = pygame.display.set_mode((1400, 800),pygame.RESIZABLE)
 
 class Player():
     def __init__(self, x, y, width, height):
@@ -50,6 +53,11 @@ class Player():
         if self.rect.top < self.limite_y[0] or self.rect.bottom > self.limite_y[1]:
             self.y = old_y
             self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+    def reset(self):
+        self.x = self.x
+        self.y = self.y
+        self.rect.topleft = (self.x, self.y)
+        self.update_hitbox()
 
 class Enemy():
     def __init__(self, x, y, width, height):
@@ -120,15 +128,22 @@ class Enemy():
 
             self.update_hitbox()
 
+    def reset(self):
+        self.rect.topleft = (self.x, self.y)
+
+        self.update_hitbox()
+
 class HealthBar():
 
-    def __init__(self, x, y, width, height, max_hp):
+    def __init__(self, x, y, width, height, max_hp, collide_damage):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.hp = max_hp
         self.max_hp = max_hp
+        self.collide_damage = collide_damage
+
 
     def draw(self, surface):
         #calculate health ratio
@@ -140,15 +155,21 @@ class HealthBar():
         self.hp -= amount
         print(f"Health decreased to {self.hp}")  # Debugging
         if self.hp <= 0:
-            self.death()
+            choice = self.collide_damage.show_death_screen(screen)
+            if choice == "retry":
+                self.reset()
+                return "retry"
+            elif choice == "exit":
+                return "exit"
+        return None
 
     def increase_health(self, amount):
         self.hp += amount
         if self.hp > self.max_hp:
             health = self.max_hp
 
-    def death(self):
-        print("player has died!")
+    def reset(self):
+        self.hp = self.max_hp
 
 class Collide_damage():
     def __init__(self, x, y, max_damage):
@@ -157,10 +178,43 @@ class Collide_damage():
         self.damage = max_damage
         self.max_damage = max_damage
 
-    def colide(self, player1, enemy):
-        collide = pygame.Rect.colliderect(enemy.rect, player1.rect)
+    def show_death_screen(self,screen):
+        font = pygame.font.Font(None, 74)
+        text = font.render("You're dead dead!", True, (255, 0, 0))
+        text_rect = text.get_rect(center=(400, 200))
 
-        #if collide:
+        retry_button = pygame.Rect(250,300,200,50)
+        exit_button = pygame.Rect(250, 400, 200, 50)
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if retry_button.collidepoint(event.pos):
+                        print("retry")
+                        return "retry"
+                    if exit_button.collidepoint(event.pos):
+                        print("exit")
+                        return "exit"
+
+            #draw the window of death
+            screen.fill((0,0,0))
+            screen.blit(text, text_rect)
+
+            #draw the buttons
+            pygame.draw.rect(screen, (0,255,0), retry_button)
+            pygame.draw.rect(screen, (255,0,0), exit_button)
+
+            #text on the button
+            font = pygame.font.Font(None, 36)
+            retry_text = font.render("Retry", True, (0, 0, 0))
+            exit_text = font.render("Exit", True, (0, 0, 0))
+            screen.blit(retry_text, (retry_button.x +70, retry_button.y + 15))
+            screen.blit(exit_text, (exit_button.x + 70, exit_button.y + 15))
+
+            pygame.display.flip()
 
 pygame.init()
 

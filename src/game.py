@@ -4,6 +4,7 @@ import pygame
 import pygame_menu
 from pygame_menu import themes
 from pygame_menu.examples.simple import start_the_game, set_difficulty
+import time
 
 from src import entities
 from src.entities import *
@@ -32,7 +33,6 @@ def level_selection():
     menu._open(world)
 
 #def set_level(value, level):
-
 
 def set_diffulty(value, difficulty):
     global selected_level
@@ -67,8 +67,6 @@ def create_menu():
 
     return menu
 
-
-
 menu = create_menu()
 
 level = pygame_menu.Menu("Levels", 1400, 800, theme=themes.THEME_BLUE)
@@ -88,20 +86,21 @@ world.add.button("Start Game", start_game)
 player1 = Player(100, 100, 50, 50)
 enemy = Enemy(200, 200, 50, 50)
 
-health_bar = HealthBar(250,200,300,40,100)
+collide_damage = Collide_damage(x=0, y=0, max_damage=10)
 
-#Collision flag
-collision_occurred = False
-"""
+health_bar = HealthBar(250,200,300,40,100, collide_damage=collide_damage)
+
 #cooldown timer
 last_collision_time = 0
 cooldown = 1
-"""
 
 run = True
 while run:
 
     events = pygame.event.get()
+    death = Collide_damage
+    Player = entities.Player
+    Enemy = entities.Enemy
 
     key = pygame.key.get_pressed()
     if key[pygame.K_LEFT]:
@@ -114,40 +113,14 @@ while run:
         player1.move(0, player1.velocity)
 
     if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
-        if not collision_occurred:
-            print("Collision detected! Health decreased.")
-            health_bar.decrease_health(2)
-            collision_occurred = True
-        else:
-            print("Collision still active, but health not decreased.")
-            health_bar.decrease_health(2)
-            collision_occurred = True
-    else:
-        print("No collision. Resetting flag.")
-        collision_occurred = False
-
-        """
-            # Check for collisions
-    if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
-        current_time = time.time()
-        if current_time - last_collision_time >= cooldown:
-            print("Collision detected! Health decreased.")
-            health_bar.decrease_health(2)
-            last_collision_time = current_time
-            
-            
-            if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
-                if not collision_occurred:
-                    print("collision")
-                    health_bar.decrease_health(2)
-                    collision_occurred = True
-                else:
-                    collision_occurred = False
-        """
-
-    # draw health bar
-    health_bar.hp = 100
-    health_bar.draw(screen)
+        result = health_bar.decrease_health(2)
+        print("Collision detected! Health decreased.")
+        if result == "retry":
+            Player.reset(player1)
+            Enemy.reset(enemy)
+            health_bar.reset()
+        elif result == "exit" or result == pygame.QUIT:
+            run = False  # quit the game
 
     pygame.display.flip()
 
@@ -177,3 +150,28 @@ while run:
     health_bar.draw(screen)
 
     pygame.display.update()
+
+
+"""
+    if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
+        if not collision_occurred:
+            print("Collision detected! Health decreased.")
+            health_bar.decrease_health(2)
+            collision_occurred = True
+        else:
+            print("Collision still active, but health not decreased.")
+            health_bar.decrease_health(2)
+            collision_occurred = True
+    else:
+        print("No collision. Resetting flag.")
+        collision_occurred = False
+"""
+""" 
+            if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
+                if not collision_occurred:
+                    print("collision")
+                    health_bar.decrease_health(2)
+                    collision_occurred = True
+                else:
+                    collision_occurred = False
+"""
