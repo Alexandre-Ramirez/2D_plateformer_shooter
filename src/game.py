@@ -92,6 +92,11 @@ health_bar = HealthBar(250,200,300,40,100)
 
 #Collision flag
 collision_occurred = False
+"""
+#cooldown timer
+last_collision_time = 0
+cooldown = 1
+"""
 
 run = True
 while run:
@@ -115,11 +120,22 @@ while run:
             collision_occurred = True
         else:
             print("Collision still active, but health not decreased.")
+            health_bar.decrease_health(2)
+            collision_occurred = True
     else:
         print("No collision. Resetting flag.")
         collision_occurred = False
 
         """
+            # Check for collisions
+    if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
+        current_time = time.time()
+        if current_time - last_collision_time >= cooldown:
+            print("Collision detected! Health decreased.")
+            health_bar.decrease_health(2)
+            last_collision_time = current_time
+            
+            
             if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
                 if not collision_occurred:
                     print("collision")
