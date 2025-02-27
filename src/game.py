@@ -67,6 +67,8 @@ def create_menu():
 
     return menu
 
+
+
 menu = create_menu()
 
 level = pygame_menu.Menu("Levels", 1400, 800, theme=themes.THEME_BLUE)
@@ -88,6 +90,9 @@ enemy = Enemy(200, 200, 50, 50)
 
 health_bar = HealthBar(250,200,300,40,100)
 
+#Collision flag
+collision_occurred = False
+
 run = True
 while run:
 
@@ -104,11 +109,31 @@ while run:
         player1.move(0, player1.velocity)
 
     if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
-        print("collision")
+        if not collision_occurred:
+            print("Collision detected! Health decreased.")
+            health_bar.decrease_health(2)
+            collision_occurred = True
+        else:
+            print("Collision still active, but health not decreased.")
+    else:
+        print("No collision. Resetting flag.")
+        collision_occurred = False
+
+        """
+            if player1.hitbox_player.colliderect(enemy.hitbox_enemy):
+                if not collision_occurred:
+                    print("collision")
+                    health_bar.decrease_health(2)
+                    collision_occurred = True
+                else:
+                    collision_occurred = False
+        """
 
     # draw health bar
-    #health_bar.hp = 50
-    #health_bar.draw(screen)
+    health_bar.hp = 100
+    health_bar.draw(screen)
+
+    pygame.display.flip()
 
     for event in events:
         if event.type == update_loading:

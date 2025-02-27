@@ -136,6 +136,20 @@ class HealthBar():
         pygame.draw.rect(surface, 'red', (700, 0, 300, 40))
         pygame.draw.rect(surface, 'green', (700, 0, int(300 * ratio), 40))
 
+    def decrease_health(self,amount):
+        self.hp -= amount
+        print(f"Health decreased to {self.hp}")  # Debugging
+        if self.hp <= 0:
+            self.death()
+
+    def increase_health(self, amount):
+        self.hp += amount
+        if self.hp > self.max_hp:
+            health = self.max_hp
+
+    def death(self):
+        print("player has died!")
+
 class Collide_damage():
     def __init__(self, x, y, max_damage):
         self.x = x
