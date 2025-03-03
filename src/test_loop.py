@@ -16,20 +16,30 @@ clock = pygame.time.Clock()
 
 
 class Platform:
-    def __init__(self, x, y, width, height, moving=False, speed=2, move_range=100):
+    def __init__(self, x, y, width, height, moving_hor=False, moving_ver=False, speed=2, move_range=100, platform_id=None):
         self.rect = pygame.Rect(x, y, width, height)
-        self.moving = moving
+        self.moving_hor = moving_hor
+        self.moving_ver = moving_ver
+        self.platform_id = platform_id
         self.speed = speed
         self.move_range = move_range
         self.start_x = x
+        self.start_y = y
         self.direction = 1  # -1 to reverse
+        self.ver_direction = 1
 
     def update(self):
-        if self.moving:
+        if self.moving_hor:
             # movement
             self.rect.x += self.speed * self.direction
             if abs(self.rect.x - self.start_x) >= self.move_range:
                 self.direction *= -1
+
+        if self.moving_ver:
+            # Vertical movement
+            self.rect.y += self.speed * self.ver_direction
+            if abs(self.rect.y - self.start_y) >= self.move_range:
+                self.ver_direction *= -1
 
     def draw(self, surface, color=(255, 255, 255)):
         pygame.draw.rect(surface, color, self.rect)
@@ -66,13 +76,16 @@ class Enemy:
 
 # Create platforms
 platforms = [
-    Platform(200, 175, 400, 50),
-    Platform(700, 350, 350, 50),
-    Platform(350, 550, 250, 50, moving=True, speed=3, move_range=250)
+    Platform(200, 175, 400, 50, platform_id=1),
+    Platform(700, 350, 350, 50, moving_ver=True, platform_id=2),
+    Platform(350, 550, 250, 50, moving_hor=True, speed=3, move_range=250, platform_id=3)
 ]
 
+# separate list for individual spawns
+platform_with_spawns = [1, 3]
+
 # Create enemies
-enemies = [Enemy(platform) for platform in platforms]
+enemies = [Enemy(platform) for platform in platforms if platform.platform_id in platform_with_spawns]
 
 # Game loop
 running = True
