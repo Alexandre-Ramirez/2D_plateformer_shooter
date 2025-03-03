@@ -2,7 +2,8 @@ import sys
 
 import pygame
 import math
-screen = pygame.display.set_mode((1400, 800),pygame.RESIZABLE)
+
+screen = pygame.display.set_mode((1400, 800))
 
 class Player():
     def __init__(self, x, y, width, height):
@@ -179,12 +180,32 @@ class Collide_damage():
         self.max_damage = max_damage
 
     def show_death_screen(self,screen):
+        #size and position of the death window
+        death_screen_width = 400
+        death_screen_height = 200
+        death_screen_x = (screen.get_width() - death_screen_width) //2 #center horizental
+        death_screen_y = (screen.get_height() - death_screen_height) //2 #center verticaly
+
+        #create a surface semi transparant for the backscreen
+        overlay = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
+        overlay.fill((0,0,0, 128)) #light black 128/255
+
+        #font and text
         font = pygame.font.Font(None, 74)
         text = font.render("You're dead dead!", True, (255, 0, 0))
-        text_rect = text.get_rect(center=(400, 200))
+        text_rect = text.get_rect(center=(death_screen_width //2,50))
 
-        retry_button = pygame.Rect(250,300,200,50)
-        exit_button = pygame.Rect(250, 400, 200, 50)
+        #buttons
+        retry_button = pygame.Rect(50,100,120,50)
+        exit_button = pygame.Rect(230, 100, 120, 50)
+
+        #text ont the buttons
+        font = pygame.font.Font(None, 36)
+        retry_text = font.render("Retry", True, (0, 0, 0)) #black text
+        retry_text_rect = retry_text.get_rect(center=retry_button.center)#center on the buttons
+
+        exit_text = font.render("Exit", True, (0, 0, 0)) #black text
+        exit_text_rect = exit_text.get_rect(center=exit_button.center) #center on the button
 
         while True:
             for event in pygame.event.get():
@@ -192,27 +213,35 @@ class Collide_damage():
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if retry_button.collidepoint(event.pos):
+                    #ajust the coordination of the mouse with the window of death
+                    mouse_x, mouse_y = event.pos
+                    relative_mouse_x = mouse_x - death_screen_x
+                    relative_mouse_y = mouse_y - death_screen_y
+
+                    if retry_button.collidepoint(relative_mouse_x, relative_mouse_y):
                         print("retry")
                         return "retry"
-                    if exit_button.collidepoint(event.pos):
+                    if exit_button.collidepoint(relative_mouse_x, relative_mouse_y):
                         print("exit")
                         return "exit"
 
+            #draw the back screen
+            screen.blit(overlay, (0, 0))
+
             #draw the window of death
-            screen.fill((0,0,0))
-            screen.blit(text, text_rect)
+            death_screen = pygame.Surface((death_screen_width, death_screen_height))
+            death_screen.fill((50, 50, 50))
+            death_screen.blit(text, text_rect)
 
             #draw the buttons
-            pygame.draw.rect(screen, (0,255,0), retry_button)
-            pygame.draw.rect(screen, (255,0,0), exit_button)
+            pygame.draw.rect(death_screen, (0,255,0), retry_button)
+            pygame.draw.rect(death_screen, (255,0,0), exit_button)
 
-            #text on the button
-            font = pygame.font.Font(None, 36)
-            retry_text = font.render("Retry", True, (0, 0, 0))
-            exit_text = font.render("Exit", True, (0, 0, 0))
-            screen.blit(retry_text, (retry_button.x +70, retry_button.y + 15))
-            screen.blit(exit_text, (exit_button.x + 70, exit_button.y + 15))
+            #draw the text on the butons
+            death_screen.blit(retry_text, retry_text_rect)
+            death_screen.blit(exit_text, exit_text_rect)
+
+            screen.blit(death_screen, (death_screen_x, death_screen_y))
 
             pygame.display.flip()
 
