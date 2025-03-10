@@ -1,5 +1,7 @@
 import pygame
 import button
+import csv
+import pickle
 #1h57:04
 
 
@@ -48,6 +50,9 @@ GREEN = (144, 201, 120)
 WHITE = (255, 255, 255)
 RED = (200, 25, 25)
 
+#define font
+font = pygame.font.SysFont('comicsans', 30)
+
 #create empty tile list
 world_data = []
 for row in range(ROWS):
@@ -59,6 +64,11 @@ for row in range(ROWS):
 for tile in range(0, MAX_COLS):
     world_data[ROWS - 1][tile] = 0
 print(world_data)
+
+#function for outputting text onto the screen
+def draw_text(text,font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
 
 #create function for drawing bg
 def draw_bg():
@@ -112,12 +122,25 @@ while run:
     draw_grid()
     draw_world()
 
+    draw_text(f'Level: {level}', font, WHITE, 10, screen_w + lower_margin - 90)
+    draw_text('Press UP or DOWN to change level', font, WHITE, 10, screen_w + lower_margin - 60)
+
     #save and load data
-    save_button.draw(screen)
-    load_button.draw(screen)
-
-
-
+    if save_button.draw(screen):
+        #save level data
+        with open(f'level{level}_data.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',')
+            for row in world_data:
+                writer.writerow(row)
+    if load_button.draw(screen):
+        #load in level data
+        #reset scroll back to the start of the level
+        scroll = 0
+        with open(f'level{level}_data.csv', newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            for x, row in enumerate(reader):
+                for y, tile in enumerate(row):
+                    world_data[y][x] = int(tile)
 
 
 
@@ -162,6 +185,10 @@ while run:
             run = False
         #keyboard presses
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                level += 1
+            if event.key == pygame.K_DOWN and level > 0:
+                level -= 1
             if event.key == pygame.K_LEFT:
                 scroll_left = True
             if event.key == pygame.K_RIGHT:
