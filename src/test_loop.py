@@ -105,16 +105,22 @@ enemies = [Enemy(platform) for platform in platforms if platform.platform_id in 
 
 # create projectiles
 bullets = []
+last_shot_time = 0
+shot_delay = 3000
+
 
 # Game loop
 running = True
 while running:
+
+    current_time = pygame.time.get_ticks()
 
     # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+        #event : shoot when the key is pressed
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if len(bullets) < 5 and enemies:
@@ -123,13 +129,11 @@ while running:
                                                round(enemy.rect.y + enemy.height // 2),
                                                5, (255, 255, 255), 1))
 
-    #keys = pygame.key.get_pressed()
-    #if keys[pygame.K_SPACE]:
-        #if len(bullets) < 5 and enemies:
-            #enemy = enemies[0]
-            #bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2),
-                                       #round(enemy.rect.y + enemy.height // 2),
-                                       #5, (255, 255, 255), 1))
+    # enemies shoot at a 5sec delay
+    if enemies and current_time - last_shot_time >= shot_delay:
+        for enemy in enemies:
+            bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2), round(enemy.rect.y + enemy.height // 2),5, (255, 255, 255), 1))
+        last_shot_time = current_time
 
     # Update platforms and enemies
     for platform in platforms:
@@ -159,18 +163,3 @@ while running:
 
 # Quit Pygame
 pygame.quit()
-
-
-
-
-
-
-
-
-
-
-
-### 1.	mouvements sur plateforme mobile générés par IA, pas encore compris comment ça marche.
-### 2.	il faudrait donner aux plateformes un ID spécifique et tweak les attributes de la classe Enemy,
-### 	sinon un ennemi spawn sur toutes les plateformes.
-### 3.	plateformes mobiles de haut en bas ?
