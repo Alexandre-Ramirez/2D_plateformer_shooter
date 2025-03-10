@@ -73,8 +73,24 @@ class Enemy:
     def draw(self, surface):
         pygame.draw.rect(surface, (255, 0, 0), self.rect)  # Red enemy
 
+class Projectiles:
+    def __init__(self, x, y, radius, color, direction):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = color
+        self.direction = direction
+        self.velocity = 10 * direction
 
-# Create platforms
+    def update(self):
+        self.x += self.velocity
+
+    def draw(self, surface):
+        pygame.draw.circle(surface, self.color, (self.x, self.y), self.radius)
+
+
+
+# create platforms
 platforms = [
     Platform(200, 175, 400, 50, platform_id=1),
     Platform(700, 350, 350, 50, moving_ver=True, platform_id=2),
@@ -84,16 +100,36 @@ platforms = [
 # separate list for individual spawns
 platform_with_spawns = [1, 3]
 
-# Create enemies
+# create enemies
 enemies = [Enemy(platform) for platform in platforms if platform.platform_id in platform_with_spawns]
+
+# create projectiles
+bullets = []
 
 # Game loop
 running = True
 while running:
+
     # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                if len(bullets) < 5 and enemies:
+                    enemy = enemies[0]
+                    bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2),
+                                               round(enemy.rect.y + enemy.height // 2),
+                                               5, (255, 255, 255), 1))
+
+    #keys = pygame.key.get_pressed()
+    #if keys[pygame.K_SPACE]:
+        #if len(bullets) < 5 and enemies:
+            #enemy = enemies[0]
+            #bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2),
+                                       #round(enemy.rect.y + enemy.height // 2),
+                                       #5, (255, 255, 255), 1))
 
     # Update platforms and enemies
     for platform in platforms:
@@ -101,12 +137,20 @@ while running:
     for enemy in enemies:
         enemy.update()
 
+    for bullet in bullets:
+        if bullet.x < 1200 and bullet.x > 0:
+            bullet.update()
+        else:
+            bullets.pop(bullets.index(bullet))
+
     # Draw everything
     screen.fill((0, 0, 0))  # Fill screen with black color
     for platform in platforms:
         platform.draw(screen)
     for enemy in enemies:
         enemy.draw(screen)
+    for bullet in bullets:
+        bullet.draw(screen)
 
     pygame.display.flip()  # Update the display
 
