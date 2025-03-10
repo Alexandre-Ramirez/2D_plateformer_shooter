@@ -1,11 +1,9 @@
 import pygame
-from toolz import excepts
-
 import button
 import csv
 import os
 import pickle
-import pandas as pd
+
 #1h57:04
 
 
@@ -35,19 +33,19 @@ scroll = 0
 scroll_speed = 1
 
 #load images
-pine1_image = pygame.image.load('images/background/pine1.png').convert_alpha()
-pine2_image = pygame.image.load('images/background/pine2.png').convert_alpha()
-mountain_image = pygame.image.load('images/background/mountain.png').convert_alpha()
-sky_image = pygame.image.load('images/background/sky_cloud.png').convert_alpha()
+pine1_image = pygame.image.load('image/backgroud/pine1.png').convert_alpha()
+pine2_image = pygame.image.load('image/backgroud/pine2.png').convert_alpha()
+mountain_image = pygame.image.load('image/backgroud/mountain.png').convert_alpha()
+sky_image = pygame.image.load('image/backgroud/sky_cloud.png').convert_alpha()
 #store tiles in a list
 img_list = []
 for x in range(TILE_TYPES):
-    img = pygame.image.load(f'images/tiles/{x}.png').convert_alpha()
+    img = pygame.image.load(f'image/tile/{x}.png').convert_alpha()
     img = pygame.transform.scale(img, (TILE_SIZE , TILE_SIZE))
     img_list.append(img)
 
-save_img = pygame.image.load('images/tiles/save_btn.png').convert_alpha()
-load_img = pygame.image.load('images/tiles/load_btn.png').convert_alpha()
+save_img = pygame.image.load('image/tile/save_btn.png').convert_alpha()
+load_img = pygame.image.load('image/tile/load_btn.png').convert_alpha()
 
 #define colors
 GREEN = (144, 201, 120)
