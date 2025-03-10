@@ -6,13 +6,16 @@ import math
 screen = pygame.display.set_mode((1400, 800))
 
 class Player():
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, scale):
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
+        self.scale = scale
+        self.player_image = pygame.image.load('images/player/soldier_with_beretta 2.png')
+        self.width = self.player_image.get_width()
+        self.height = self.player_image.get_height()
         self.velocity = velocity
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.rect = self.player_image.get_rect()
+        self.rect.center = (self.x, self.y)
         self.hitbox_w = self.width + 5
         self.hitbox_h = self.height + 5
         self.update_hitbox()
@@ -27,7 +30,7 @@ class Player():
 
     def draw(self, surface):
 
-        pygame.draw.rect(surface, 'red', self.rect)
+        surface.blit(self.player_image, self.rect)
         pygame.draw.rect(surface, 'black', self.hitbox_player,2)
 
     def move(self, dx, dy):

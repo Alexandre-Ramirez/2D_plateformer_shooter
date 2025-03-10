@@ -43,7 +43,7 @@ def level_selection():
             return 3
         case _:
             return None
-
+"""
 def play_level():
 
     running = True
@@ -72,16 +72,16 @@ def play_level():
         pygame.display.flip()
 
         # Enemy AI: Move towards the player
-        enemy.move_towards_player(player1)
+        #enemy.move_towards_player(player1)
 
         # pygame.draw.rect(window, (255,0,0), player)
-        player1.draw(screen)
-        enemy.draw(screen)
-        health_bar.draw(screen)
+        #player1.draw(screen)
+        #enemy.draw(screen)
+        #health_bar.draw(screen)
 
         pygame.display.update()
 
-
+"""
 #def set_level(value, level):
 
 def set_diffulty(value, difficulty):
@@ -118,7 +118,7 @@ def start_game():
     elif set_difficulty == 'Hard' and selected_level == 3:
         pass
 
-    play_level()
+    #play_level()
 
 
 def level_menu():
@@ -155,7 +155,7 @@ world.add.selector('Level: ', [('World 1:1','1'), ('world 1:2', 'Medium'), ('Wor
 world.add.button("Back", pygame_menu.events.BACK)
 world.add.button("Start Game", start_game)
 
-player1 = Player(100, 100, 50, 50)
+player1 = Player(100, 100, 1)
 enemy = Enemy(200, 200, 50, 50)
 
 collide_damage = Collide_damage(x=0, y=0, max_damage=10)
@@ -170,19 +170,19 @@ run = True
 while run:
 
     events = pygame.event.get()
-    #death = Collide_damage
-    #Player = entities.Player
-    #Enemy = entities.Enemy
+    death = Collide_damage
+    Player = entities.Player
+    Enemy = entities.Enemy
 
-    #key = pygame.key.get_pressed()
-    #if key[pygame.K_LEFT]:
-     #   player1.move(-player1.velocity, 0)
-    #if key[pygame.K_RIGHT]:
-     #   player1.move(player1.velocity, 0)
-    #if key[pygame.K_UP]:
-     #   player1.move(0, -player1.velocity)
-    #if key[pygame.K_DOWN]:
-     #   player1.move(0, player1.velocity)
+    key = pygame.key.get_pressed()
+    if key[pygame.K_LEFT]:
+        player1.move(-player1.velocity, 0)
+    if key[pygame.K_RIGHT]:
+        player1.move(player1.velocity, 0)
+    if key[pygame.K_UP]:
+        player1.move(0, -player1.velocity)
+    if key[pygame.K_DOWN]:
+        player1.move(0, player1.velocity)
 
     pygame.display.flip()
 
@@ -204,12 +204,12 @@ while run:
             arrow.draw(screen, menu.get_current().get_selected_widget())
 
     # Enemy AI: Move towards the player
-    #enemy.move_towards_player(player1)
+    enemy.move_towards_player(player1)
 
     #pygame.draw.rect(window, (255,0,0), player)
-    #player1.draw(screen)
-    #enemy.draw(screen)
-    #health_bar.draw(screen)
+    player1.draw(screen)
+    enemy.draw(screen)
+    health_bar.draw(screen)
 
     pygame.display.update()
 """

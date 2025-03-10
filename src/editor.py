@@ -1,7 +1,11 @@
 import pygame
+from toolz import excepts
+
 import button
 import csv
+import os
 import pickle
+import pandas as pd
 #1h57:04
 
 
@@ -12,7 +16,7 @@ FPS = 60
 
 #game window
 screen_w, screen_h = 800, 640
-lower_margin = 100
+lower_margin = 90
 side_margin = 300
 
 screen = pygame.display.set_mode((screen_w + side_margin, screen_h + lower_margin))
@@ -22,7 +26,7 @@ pygame.display.set_caption('Level editor')
 ROWS = 16
 MAX_COLS = 150
 TILE_SIZE = screen_w // ROWS
-TILE_TYPES = 6
+TILE_TYPES = 8
 level = 0
 current_tile = 0
 scroll_left = False
@@ -31,19 +35,19 @@ scroll = 0
 scroll_speed = 1
 
 #load images
-pine1_image = pygame.image.load('image/background/pine1.png').convert_alpha()
-pine2_image = pygame.image.load('image/background/pine2.png').convert_alpha()
-mountain_image = pygame.image.load('image/background/mountain.png').convert_alpha()
-sky_image = pygame.image.load('image/background/sky_cloud.png').convert_alpha()
+pine1_image = pygame.image.load('images/background/pine1.png').convert_alpha()
+pine2_image = pygame.image.load('images/background/pine2.png').convert_alpha()
+mountain_image = pygame.image.load('images/background/mountain.png').convert_alpha()
+sky_image = pygame.image.load('images/background/sky_cloud.png').convert_alpha()
 #store tiles in a list
 img_list = []
 for x in range(TILE_TYPES):
-    img = pygame.image.load(f'image/tile/{x}.png').convert_alpha()
+    img = pygame.image.load(f'images/tiles/{x}.png').convert_alpha()
     img = pygame.transform.scale(img, (TILE_SIZE , TILE_SIZE))
     img_list.append(img)
 
-save_img = pygame.image.load('image/tile/save_btn.png').convert_alpha()
-load_img = pygame.image.load('image/tile/load_btn.png').convert_alpha()
+save_img = pygame.image.load('images/tiles/save_btn.png').convert_alpha()
+load_img = pygame.image.load('images/tiles/load_btn.png').convert_alpha()
 
 #define colors
 GREEN = (144, 201, 120)
@@ -87,8 +91,8 @@ def draw_grid():
         pygame.draw.line(screen, WHITE, (c * TILE_SIZE - scroll, 0),(c * TILE_SIZE - scroll, screen_h))
 
     #horizental lines
-    for c in range(ROWS + 1):
-        pygame.draw.line(screen, WHITE,(0, c * TILE_SIZE),(screen_w, c * TILE_SIZE))
+    for r in range(ROWS - 2):
+        pygame.draw.line(screen, WHITE,(0, r * TILE_SIZE),(screen_w, r * TILE_SIZE ))
 
 #function for drawing the world tiles
 def draw_world():
@@ -98,8 +102,8 @@ def draw_world():
                 screen.blit(img_list[tile], (x * TILE_SIZE - scroll, y * TILE_SIZE))
 
 #create buttons
-save_button = button.Button(screen_w // 2, screen_h + lower_margin +50, save_img, 1)
-load_button = button.Button(screen_w // 2 + 200, screen_h + lower_margin +50, load_img, 1)
+save_button = button.Button(screen_w // 2 + 150, screen_h + 40, save_img, 1)
+load_button = button.Button(screen_w // 2 + 350, screen_h + 40, load_img, 1)
 #make a button list
 button_list = []
 button_col = 0
@@ -122,24 +126,35 @@ while run:
     draw_grid()
     draw_world()
 
-    draw_text(f'Level: {level}', font, WHITE, 10, screen_w + lower_margin - 90)
-    draw_text('Press UP or DOWN to change level', font, WHITE, 10, screen_w + lower_margin - 60)
+    draw_text(f'Level: {level}', font, WHITE, 10, screen_h + lower_margin - 90)
+    draw_text('Press UP or DOWN to change level', font, WHITE, 10, screen_h + lower_margin - 60)
 
     #save and load data
     if save_button.draw(screen):
+        file_path = f'level{level}_data.csv'
+        print(f"Saving to: {os.path.abspath(file_path)}")
         #save level data
-        with open(f'level{level}_data.csv', 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',')
-            for row in world_data:
-                writer.writerow(row)
+        try:
+            with open(f'level{level}_data.csv', 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile, delimiter=';')
+
+                for row in world_data:
+                    writer.writerow(row)
+            print("Level saved")
+        except Exception as e:
+            print(f"Error saving level: {e}")
+
+
+
+
     if load_button.draw(screen):
         #load in level data
         #reset scroll back to the start of the level
         scroll = 0
         with open(f'level{level}_data.csv', newline='') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            for x, row in enumerate(reader):
-                for y, tile in enumerate(row):
+            reader = csv.reader(csvfile, delimiter=';')
+            for y, row in enumerate(reader):
+                for x, tile in enumerate(row):
                     world_data[y][x] = int(tile)
 
 
@@ -175,8 +190,9 @@ while run:
         if pygame.mouse.get_pressed()[0] == 1:
             if world_data[y][x] != current_tile:
                 world_data[y][x] = current_tile
-            if pygame.mouse.get_pressed()[2] == 1:
-                world_data[y][x] = -1
+        if pygame.mouse.get_pressed()[2] == 1:
+            world_data[y][x] = -1
+            print("efface")
 
     print(x,y)
 
