@@ -177,6 +177,7 @@ last_collision_time = 0
 cooldown = 1
 
 run = True
+jumping = False
 #main loop
 while run:
 
@@ -192,10 +193,14 @@ while run:
         player1.move(-player1.velocity, 0)
     if key[pygame.K_RIGHT]:
         player1.move(player1.velocity, 0)
-    if key[pygame.K_UP]:
-        player1.move(0, -player1.velocity)
+    if key[pygame.K_UP] or key[pygame.K_SPACE]:
+        jumping = True
     if key[pygame.K_DOWN]:
         player1.move(0, player1.velocity)
+
+    if jumping:
+        Player.jump(player1,1,20,20)
+
 
     pygame.display.flip()
 

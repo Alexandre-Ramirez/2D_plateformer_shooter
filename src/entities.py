@@ -10,7 +10,7 @@ class Player():
         self.x = x
         self.y = y
         self.scale = scale
-        self.player_image = pygame.image.load('images/player/soldier_with_beretta 2.png')
+        self.player_image = pygame.image.load('image/player/soldier_with_beretta 2.png')
         self.width = self.player_image.get_width()
         self.height = self.player_image.get_height()
         self.velocity = velocity
@@ -19,6 +19,11 @@ class Player():
         self.hitbox_w = self.width + 5
         self.hitbox_h = self.height + 5
         self.update_hitbox()
+        #add jumping
+        self.jumping = False
+        self.jump_speed = 1
+        self.y_gravity = 1 #gravity force
+        self.jump_height = 20 #max height jump
 
     def update_hitbox(self):
         self.hitbox_player = pygame.Rect(
@@ -57,11 +62,27 @@ class Player():
         if self.rect.top < self.limite_y[0] or self.rect.bottom > self.limite_y[1]:
             self.y = old_y
             self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+
     def reset(self):
         self.x = self.x
         self.y = self.y
         self.rect.topleft = (self.x, self.y)
         self.update_hitbox()
+
+    def start_jump(self):
+        if not self.jumping: #if the player is already jumping stop the possibility of jump
+
+            self.jumping = True
+            self.jump_speed = self.jump_height #put the jumps speed
+
+    def update_jump(self):
+        if self.jumping:
+            self.y -= self.jump_speed
+            self.jump_speed -= self.y_gravity
+
+            if self.jump_speed < -self.jump_height:
+                self.jumping = False
+                self.jump_speed = self.jump_height
 
 class Enemy():
     def __init__(self, x, y, width, height):
