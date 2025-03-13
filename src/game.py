@@ -15,21 +15,19 @@ from src.environment import *
 pygame.init()
 #setup pygame
 screen = pygame.display.set_mode((1400, 800),pygame.RESIZABLE)
-x,y = screen.get_size()
+screen_width, screen_height = screen.get_size()
 
 #setup window's title
 pygame.display.set_caption("Plateformer")
-#setup bg color
-#color = (125,125,125)
 
-#def draw_menu(screen):
-    #take the size of the screen
-screen_width, screen_height = screen.get_size()
 
 # Crée un nouvel événement personnalisé pour signaler la fin du chargement
 END_LOADING = pygame.USEREVENT +1
-selected_level = 'Easy'
+#variable to follow the state of the game
+current_state = "menu"
+selected_level = '1'
 selected_difficulty = 'Easy'
+
 
 def level_selection():
     menu._open(world)
@@ -85,14 +83,23 @@ def play_level():
 #def set_level(value, level):
 
 def set_diffulty(value, difficulty):
+    global selected_difficulty
+    selected_difficulty = difficulty
+    print(f"Difficulty selected: {difficulty}")
+
+def set_level(value, level):
     global selected_level
     selected_level = level
     print(f"Level selected = {selected_level}")
 
-    #print(value)
-    #print(difficulty)
 
 def start_game():
+    global current_state
+    print(f"Starting game with level: {selected_level} and difficulty: {selected_difficulty}")
+    current_state = "game" #the state pass to "game"
+
+    menu.disable() #the pass to off
+    """
     print(f"Starting game with level : {selected_level}")
     menu._open(loading)
     pygame.time.set_timer(update_loading, 30)
@@ -119,7 +126,7 @@ def start_game():
         pass
 
     #play_level()
-
+"""
 
 def level_menu():
     menu._open(level)
@@ -153,7 +160,7 @@ arrow = pygame_menu.widgets.LeftArrowSelection(arrow_size = (10, 15))
 world = pygame_menu.Menu("Choose your level...", 1400, 800, theme=themes.THEME_SOLARIZED)
 world.add.selector('Level: ', [('World 1:1','1'), ('world 1:2', 'Medium'), ('World 1:3','Hard')], onchange=start_game())
 world.add.button("Back", pygame_menu.events.BACK)
-world.add.button("Start Game", start_game)
+world.add.button("Start Game", onchange=start_game)
 
 player1 = Player(100, 100, 1)
 enemy = Enemy(200, 200, 50, 50)
@@ -197,19 +204,33 @@ while run:
         if event.type == END_LOADING:
             menu._open(world)
 
-    if menu.is_enabled():
-        menu.update(events)
-        menu.draw(screen)
-        if (menu.get_current().get_selected_widget()):
-            arrow.draw(screen, menu.get_current().get_selected_widget())
+    if current_state == "menu":
+        #draw the menu
+        if menu.is_enabled():
+            menu.update(events)
+            menu.draw(screen)
+            if (menu.get_current().get_selected_widget()):
+                arrow.draw(screen, menu.get_current().get_selected_widget())
+    elif current_state == "game":
+        # Afficher le jeu
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            current_state = "menu"
+            menu.enable()
+        # Ici, vous pouvez gérer la logique du jeu
+        player1.draw(screen)
+        enemy.draw(screen)
+        health_bar.draw(screen)
+        # Remplacez ceci par votre logique de jeu
+        # Exemple : Dessiner un texte pour indiquer que le jeu est en cours
+        font = pygame.font.Font(None, 74)
+        text = font.render(f"Level {selected_level} - Difficulty: {selected_difficulty}", True, (255, 255, 255))
+        screen.blit(text, (screen_width // 2 - 250, screen_height // 2))
 
     # Enemy AI: Move towards the player
     enemy.move_towards_player(player1)
 
-    #pygame.draw.rect(window, (255,0,0), player)
-    player1.draw(screen)
-    enemy.draw(screen)
-    health_bar.draw(screen)
+
 
     pygame.display.update()
 """

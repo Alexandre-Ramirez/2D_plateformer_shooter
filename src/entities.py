@@ -10,7 +10,7 @@ class Player():
         self.x = x
         self.y = y
         self.scale = scale
-        self.player_image = pygame.image.load('images/player/soldier_with_beretta 2.png')
+        self.player_image = pygame.image.load('image/player/soldier_with_beretta.png')
         self.width = self.player_image.get_width()
         self.height = self.player_image.get_height()
         self.velocity = velocity
