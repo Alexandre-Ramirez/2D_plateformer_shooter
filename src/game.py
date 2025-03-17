@@ -1,17 +1,14 @@
 #sleep permet de suspendre l'exécution d'un programme pendant une durée spécifique
 from time import sleep
-from unittest import case
 import pygame
 import pygame_menu
 from pygame_menu import themes
 from pygame_menu.examples.simple import start_the_game, set_difficulty
 import time
 import csv
-
-from src import entities
-from src.editor import TILE_TYPES
 from src.entities import *
 from src.environment import *
+import os
 
 pygame.init()
 #setup pygame
@@ -19,25 +16,79 @@ screen = pygame.display.set_mode((1400, 800),pygame.RESIZABLE)
 screen_width, screen_height = screen.get_size()
 
 #define game variable
-
 ROWS = 16
 COLS = 150
 TILE_SIZE = screen_height // ROWS
-TILE_TYPES =
+TILE_TYPES = 9
 level = 1
+SCROLL_THRESH = 200
+#screen_scroll = 0
+bg_scroll = 0
+#define colors
+GREEN = (144, 201, 120)
+WHITE = (255, 255, 255)
+RED = (200, 25, 25)
+
+#load images
+pine1_image = pygame.image.load(f'image/backgroud/pine1.png').convert_alpha()
+pine2_image = pygame.image.load(f'image/backgroud/pine2.png').convert_alpha()
+mountain_image = pygame.image.load(f'image/backgroud/mountain.png').convert_alpha()
+sky_image = pygame.image.load(f'image/backgroud/sky_cloud.png').convert_alpha()
 
 #setup window's title
 pygame.display.set_caption("Plateformer")
-
 
 # create a new event to telle when the loading is over
 END_LOADING = pygame.USEREVENT +1
 
 #variable to follow the state of the game
-current_state = "menu"
+current_state = "game"
 selected_level = '1'
 selected_difficulty = 'Easy'
 
+#store tiles in a list
+img_list = []
+for x in range(TILE_TYPES):
+    img = pygame.image.load(f'image/tile/{x}.png')
+    img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
+    img_list.append(img)
+
+class Worlds():
+    def __init__(self):
+        self.obstacles_list = []
+        #store tiles in a list
+
+    def proccess_data(self, data ):
+        #iterate through each value in level data file
+        for y, row in enumerate(data):
+            for x, tile in enumerate(row):
+                if tile >= 0:
+                    img = img_list[tile]
+                    img_rect = img.get_rect()
+                    img_rect.x = x * TILE_SIZE
+                    img_rect.y = y * TILE_SIZE
+                    tile_data = (img, img_rect)
+                    if tile >=0 and tile <= 8:
+                        self.obstacles_list.append(tile_data)
+                    elif tile >= 8 and tile <= 8:
+                        pass #decortion
+                    elif tile == 10: #create a player
+                        pass
+
+    def draw(self, screen_scroll):
+        for tile in self.obstacles_list:
+            tile[1][0] += screen_scroll
+            screen.blit(tile[0], tile[1])
+
+#create function for drawing bg
+def draw_bg(screen_scroll):
+    screen.fill(GREEN)
+    width = sky_image.get_width()
+    for x in range (4):
+        screen.blit(sky_image, (x * width + screen_scroll, 0)) #mettre les images du plus loins au plus proche
+        screen.blit(mountain_image, (x * width + screen_scroll, screen_height - mountain_image.get_height() - 300))
+        screen.blit(pine1_image, (x * width + screen_scroll, screen_height - pine1_image.get_height() - 150))
+        screen.blit(pine2_image, (x * width + screen_scroll, screen_height - pine2_image.get_height()))
 def level_selection():
     menu._open(world)
 
@@ -50,6 +101,7 @@ def level_selection():
             return 3
         case _:
             return None
+
 """
 def play_level():
 
@@ -61,6 +113,9 @@ def play_level():
         death = Collide_damage
         Player = entities.Player
         Enemy = entities.Enemy
+
+        #update background
+        world.draw()
 
         for events in pygame.event.get():
             if events.type == pygame.QUIT:
@@ -87,8 +142,8 @@ def play_level():
         #health_bar.draw(screen)
 
         pygame.display.update()
-
 """
+
 #def set_level(value, level):
 
 #the player set a difficulty
@@ -107,12 +162,10 @@ def start_game():
     print(f"Starting game with level: {selected_level} and difficulty: {selected_difficulty}")
     current_state = "game" #the state pass to "game"
     menu.disable() #the pass to off
-    """
+    menu.close()
+
     print(f"Starting game with level : {selected_level}")
-    menu._open(loading)
-    pygame.time.set_timer(update_loading, 30)
-    # Définir un temps après lequel le chargement est terminé (ex: 3 secondes)
-    pygame.time.set_timer(END_LOADING, 3000)  # 3000 ms = 3 secondes
+
 
     if set_difficulty == 'Easy' and selected_level == 1:
         pass
@@ -134,7 +187,13 @@ def start_game():
         pass
 
     #play_level()
-"""
+
+def loading():
+    menu._open(loading)
+    pygame.time.set_timer(update_loading, 30)
+    # Définir un temps après lequel le chargement est terminé (ex: 3 secondes)
+    pygame.time.set_timer(END_LOADING, 3000)  # 3000 ms = 3 secondes
+
 
 #def level_menu():
  #   menu._open(level)
@@ -192,10 +251,27 @@ health_bar = HealthBar(250,200,300,40,100, collide_damage=collide_damage)
 last_collision_time = 0
 cooldown = 1
 
+#create empty tyle list
+world_data = []
+for row in range(ROWS):
+    r = [-1] * COLS
+    world_data.append(r)
+#load in level data and create world
+with open(f'level{level}_data.csv', newline='') as csvfile:
+    reader = csv.reader(csvfile, delimiter=';')
+    for x, row in enumerate(reader):
+        for y, tile in enumerate(row):
+            world_data[x][y] = int(tile)
+
+worlds = Worlds()
+worlds.proccess_data(world_data)
+
 run = True
 jumping = False
 #main loop
 while run:
+    screen_scroll = 0
+    print(f"current state {current_state}")
 
     #define the characteristic
     events = pygame.event.get()
@@ -209,14 +285,16 @@ while run:
             progress.set_value(progress.get_value() + 1)
             if progress.get_value() == 100:
                 pygame.time.set_timer(update_loading, 0)
+                current_state = "game"
+                loading.disable()
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 current_state = "menu"
                 menu.enable()
-        if event.type == END_LOADING:
-            menu._open(world)
+        #if event.type == END_LOADING:
+         #   menu._open(start_game)
 
     screen.fill((0, 0, 0))
 
@@ -232,27 +310,32 @@ while run:
         # movements of the player
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
-            player1.move(-player1.velocity, 0)
+            screen_scroll = player1.move(-player1.velocity, 0)
         if key[pygame.K_RIGHT]:
-            player1.move(player1.velocity, 0)
+            screen_scroll = player1.move(player1.velocity, 0)
         if key[pygame.K_UP] or key[pygame.K_SPACE]:
             jumping = True
         if key[pygame.K_DOWN]:
             player1.move(0, player1.velocity)
+
 
         if jumping:
             player1.jump(player1, 1, 20, 20)
 
         # Ici, vous pouvez gérer la logique du jeu
         # draw at the screen
+        draw_bg(screen_scroll)
+        # update background
+        worlds.draw(screen_scroll)
+
         player1.draw(screen)
-        enemy.draw(screen)
+        #enemy.draw(screen)
         health_bar.draw(screen)
         # Remplacez ceci par votre logique de jeu
         # Exemple : Dessiner un texte pour indiquer que le jeu est en cours
-        font = pygame.font.Font(None, 74)
-        text = font.render(f"Level {selected_level} - Difficulty: {selected_difficulty}", True, (255, 255, 255))
-        screen.blit(text, (screen_width // 2 - 250, screen_height // 2))
+        #font = pygame.font.Font(None, 74)
+        #text = font.render(f"Level {selected_level} - Difficulty: {selected_difficulty}", True, (255, 255, 255))
+        #screen.blit(text, (screen_width // 2 - 250, screen_height // 2))
 
         # Enemy AI: Move towards the player
         enemy.move_towards_player(player1)
@@ -300,3 +383,4 @@ while run:
                 else:
                     collision_occurred = False
 """
+print(f"current state: {current_state}")

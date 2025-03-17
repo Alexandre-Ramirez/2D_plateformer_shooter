@@ -3,6 +3,10 @@ import sys
 import pygame
 import math
 
+from pygame_menu.examples.timer_clock import surface
+
+
+
 screen = pygame.display.set_mode((1400, 800))
 
 class Player():
@@ -19,6 +23,9 @@ class Player():
         self.hitbox_w = self.width + 5
         self.hitbox_h = self.height + 5
         self.update_hitbox()
+        self.screen_width = 1400
+        self.SCROLL_THRESH = 200
+        #self.screen_scroll = 0
         #add jumping
         self.jumping = False
         self.jump_speed = 1
@@ -39,6 +46,9 @@ class Player():
         pygame.draw.rect(surface, 'black', self.hitbox_player,2)
 
     def move(self, dx, dy):
+
+        screen_scroll = 0
+
         #garde l'ancienne position avant le déplacement
         old_x = self.x
         old_y = self.y
@@ -46,6 +56,12 @@ class Player():
         #déplacement
         self.x += dx
         self.y += dy
+
+        #maj scroll based on player position
+        if self.rect.right > self.screen_width - self.SCROLL_THRESH or self.rect.left < self.SCROLL_THRESH:
+            self.rect.x -= -dx
+            screen_scroll = -dx
+        #return self.screen_scroll
 
         self.limite_x = (60, 1340)
         self.limite_y = (60, 740)
@@ -62,6 +78,8 @@ class Player():
         if self.rect.top < self.limite_y[0] or self.rect.bottom > self.limite_y[1]:
             self.y = old_y
             self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+
+        return screen_scroll
 
     def reset(self):
         self.x = self.x
