@@ -6,8 +6,10 @@ import pygame_menu
 from pygame_menu import themes
 from pygame_menu.examples.simple import start_the_game, set_difficulty
 import time
+import csv
 
 from src import entities
+from src.editor import TILE_TYPES
 from src.entities import *
 from src.environment import *
 
@@ -15,6 +17,14 @@ pygame.init()
 #setup pygame
 screen = pygame.display.set_mode((1400, 800),pygame.RESIZABLE)
 screen_width, screen_height = screen.get_size()
+
+#define game variable
+
+ROWS = 16
+COLS = 150
+TILE_SIZE = screen_height // ROWS
+TILE_TYPES =
+level = 1
 
 #setup window's title
 pygame.display.set_caption("Plateformer")
@@ -96,7 +106,6 @@ def start_game():
     global current_state
     print(f"Starting game with level: {selected_level} and difficulty: {selected_difficulty}")
     current_state = "game" #the state pass to "game"
-
     menu.disable() #the pass to off
     """
     print(f"Starting game with level : {selected_level}")
@@ -127,8 +136,8 @@ def start_game():
     #play_level()
 """
 
-def level_menu():
-    menu._open(level)
+#def level_menu():
+ #   menu._open(level)
 
 #create a main menu when starting the game
 def create_menu():
@@ -141,7 +150,7 @@ def create_menu():
 
     menu.add.text_input('Name : ', default="username",)
     menu.add.button('Play', level_selection)
-    menu.add.button('Levels', level_menu)
+    menu.add.button('Levels', set_level)
     menu.add.button('Quit', pygame_menu.events.EXIT)
 
     return menu
@@ -149,10 +158,11 @@ def create_menu():
 #define the characteristic of each menu
 #define create_menu by menu
 menu = create_menu()
+menu.enable()
 
 #define the display of the level's menu
-level = pygame_menu.Menu("Levels", 1400, 800, theme=themes.THEME_BLUE)
-level.add.selector('world: ', [('easy',1), ('medium',2), ('hard',3)], onchange=set_difficulty)
+levels = pygame_menu.Menu("Levels", 1400, 800, theme=themes.THEME_BLUE)
+levels.add.selector('world: ', [('easy', 1), ('medium', 2), ('hard', 3)], onchange=set_difficulty)
 
 #define the display of loading
 loading = pygame_menu.Menu('Loading the Game...', 1400, 800, theme=themes.THEME_DARK)
@@ -164,9 +174,9 @@ arrow = pygame_menu.widgets.LeftArrowSelection(arrow_size = (10, 15))
 
 #define the display of the level's selector
 world = pygame_menu.Menu("Choose your level...", 1400, 800, theme=themes.THEME_SOLARIZED)
-world.add.selector('Level: ', [('World 1:1','1'), ('world 1:2', 'Medium'), ('World 1:3','Hard')], onchange=start_game())
+world.add.selector('Level: ', [('World 1:1','1'), ('world 1:2', 'Medium'), ('World 1:3','Hard')], onchange=start_game)
 world.add.button("Back", pygame_menu.events.BACK)
-world.add.button("Start Game", onchange=start_game)
+world.add.button("Start Game", start_game)
 
 #give the details about the player
 player1 = Player(100, 100, 1)
@@ -189,51 +199,50 @@ while run:
 
     #define the characteristic
     events = pygame.event.get()
-    death = Collide_damage
-    Player = entities.Player
-    Enemy = entities.Enemy
-
-    #movements of the player
-    key = pygame.key.get_pressed()
-    if key[pygame.K_LEFT]:
-        player1.move(-player1.velocity, 0)
-    if key[pygame.K_RIGHT]:
-        player1.move(player1.velocity, 0)
-    if key[pygame.K_UP] or key[pygame.K_SPACE]:
-        jumping = True
-    if key[pygame.K_DOWN]:
-        player1.move(0, player1.velocity)
-
-    if jumping:
-        Player.jump(player1,1,20,20)
-
-
-    pygame.display.flip()
+    #death = Collide_damage
+    #Player = entities.Player
+    #Enemy = entities.Enemy
 
     for event in events:
         if event.type == update_loading:
             progress = loading.get_widget("1")
-            progress.set_value(progress.get_value() +1)
+            progress.set_value(progress.get_value() + 1)
             if progress.get_value() == 100:
                 pygame.time.set_timer(update_loading, 0)
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                current_state = "menu"
+                menu.enable()
         if event.type == END_LOADING:
             menu._open(world)
 
+    screen.fill((0, 0, 0))
+
     if current_state == "menu":
-        #draw the menu
+        # draw the menu
         if menu.is_enabled():
             menu.update(events)
             menu.draw(screen)
-            if (menu.get_current().get_selected_widget()):
-                arrow.draw(screen, menu.get_current().get_selected_widget())
+            # if (menu.get_current().get_selected_widget()):
+            #   arrow.draw(screen, menu.get_current().get_selected_widget())
     elif current_state == "game":
         # Afficher le jeu
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_ESCAPE]:
-            current_state = "menu"
-            menu.enable()
+        # movements of the player
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT]:
+            player1.move(-player1.velocity, 0)
+        if key[pygame.K_RIGHT]:
+            player1.move(player1.velocity, 0)
+        if key[pygame.K_UP] or key[pygame.K_SPACE]:
+            jumping = True
+        if key[pygame.K_DOWN]:
+            player1.move(0, player1.velocity)
+
+        if jumping:
+            player1.jump(player1, 1, 20, 20)
+
         # Ici, vous pouvez gérer la logique du jeu
         # draw at the screen
         player1.draw(screen)
@@ -245,11 +254,10 @@ while run:
         text = font.render(f"Level {selected_level} - Difficulty: {selected_difficulty}", True, (255, 255, 255))
         screen.blit(text, (screen_width // 2 - 250, screen_height // 2))
 
-    # Enemy AI: Move towards the player
-    enemy.move_towards_player(player1)
+        # Enemy AI: Move towards the player
+        enemy.move_towards_player(player1)
 
-
-
+    pygame.display.flip()
     pygame.display.update()
 """
    #define the hitbox with the health bar
