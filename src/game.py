@@ -238,7 +238,7 @@ world.add.button("Back", pygame_menu.events.BACK)
 world.add.button("Start Game", start_game)
 
 #give the details about the player
-player1 = Player(100, 100, 1)
+player1 = Player(100, 300, 1)
 enemy = Enemy(200, 200, 50, 50)
 
 #define the collision
@@ -271,7 +271,7 @@ jumping = False
 #main loop
 while run:
     screen_scroll = 0
-    print(f"current state {current_state}")
+    #print(f"current state {current_state}")
 
     #define the characteristic
     events = pygame.event.get()
@@ -314,13 +314,18 @@ while run:
         if key[pygame.K_RIGHT]:
             screen_scroll = player1.move(player1.velocity, 0)
         if key[pygame.K_UP] or key[pygame.K_SPACE]:
-            jumping = True
+            print("jump")
+            player1.jump()
+
+        player1.reset()
+
+            #jumping = True
         if key[pygame.K_DOWN]:
             player1.move(0, player1.velocity)
 
-
-        if jumping:
-            player1.jump(player1, 1, 20, 20)
+         #       if jumping:
+#            player1.jump()
+            #Player.jump(player1, 1, TILE_SIZE * 2, TILE_SIZE * 2)
 
         # Ici, vous pouvez gérer la logique du jeu
         # draw at the screen
@@ -330,7 +335,7 @@ while run:
 
         player1.draw(screen)
         #enemy.draw(screen)
-        health_bar.draw(screen)
+        #health_bar.draw(screen)
         # Remplacez ceci par votre logique de jeu
         # Exemple : Dessiner un texte pour indiquer que le jeu est en cours
         #font = pygame.font.Font(None, 74)
@@ -383,4 +388,4 @@ while run:
                 else:
                     collision_occurred = False
 """
-print(f"current state: {current_state}")
+#print(f"current state: {current_state}")

@@ -8,6 +8,7 @@ from pygame_menu.examples.timer_clock import surface
 
 
 screen = pygame.display.set_mode((1400, 800))
+screen_width, screen_height = screen.get_size()
 
 class Player():
     def __init__(self, x, y, scale):
@@ -20,17 +21,24 @@ class Player():
         self.velocity = velocity
         self.rect = self.player_image.get_rect()
         self.rect.center = (self.x, self.y)
+        self.screen_width = 1400
+        self.SCROLL_THRESH = 200
+
+        #hitbox
         self.hitbox_w = self.width + 5
         self.hitbox_h = self.height + 5
         self.update_hitbox()
-        self.screen_width = 1400
-        self.SCROLL_THRESH = 200
-        #self.screen_scroll = 0
+
         #add jumping
         self.jumping = False
-        self.jump_speed = 1
-        self.y_gravity = 1 #gravity force
-        self.jump_height = 20 #max height jump
+        self.vel_y = 0
+        self.jump_height = 15
+        self.gravity = 9.81
+        self.on_ground = True
+
+        #moves limit
+        self.limite_x = (60, 1340)
+        self.limite_y = (60, 740)
 
     def update_hitbox(self):
         self.hitbox_player = pygame.Rect(
@@ -57,50 +65,64 @@ class Player():
         self.x += dx
         self.y += dy
 
+        # Màj du joueur
+        self.rect.topleft = (self.x, self.y)
+        self.update_hitbox()
+
         #maj scroll based on player position
         if self.rect.right > self.screen_width - self.SCROLL_THRESH or self.rect.left < self.SCROLL_THRESH:
             self.rect.x -= -dx
             screen_scroll = -dx
-        #return self.screen_scroll
-
-        self.limite_x = (60, 1340)
-        self.limite_y = (60, 740)
-
-        #Màj du joueur
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.update_hitbox()
 
         #vérif des limites
         if self.rect.left < self.limite_x[0] or self.rect.right > self.limite_x[1]:
             self.x = old_x
-            self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+            #self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
         if self.rect.top < self.limite_y[0] or self.rect.bottom > self.limite_y[1]:
             self.y = old_y
-            self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+            #self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
         return screen_scroll
+
+    def jumps(self):
+        print(f"{self.y}")
+        if not self.jumping:
+            self.vel_y = self.jump_speed
+            self.jumping = True
+
+        if self.jumping:
+            self.vel_y += self.y_gravity
+            self.y += self.vel_y
+
+            if self.y >= 400:
+                self.y = 400
+                self.jumping = False
+                #self.update_hitbox()
+                self.vel_y = 0
+
+    def jump(self):
+        if self.on_ground:
+            self.vel_y = -self.jump_height
+            self.on_ground = False
+
+    def apply_gravity(self):
+        if not self.on_ground:
+            self.vel_y += self.gravity
+            self.y += self.vel_y
+
+            if self.y >= 400:
+                self.y = 400
+                self.jumping = False
+                self.on_ground = True
+                self.vel_y = 0
 
     def reset(self):
         self.x = self.x
         self.y = self.y
         self.rect.topleft = (self.x, self.y)
         self.update_hitbox()
-
-    def start_jump(self):
-        if not self.jumping: #if the player is already jumping stop the possibility of jump
-
-            self.jumping = True
-            self.jump_speed = self.jump_height #put the jumps speed
-
-    def update_jump(self):
-        if self.jumping:
-            self.y -= self.jump_speed
-            self.jump_speed -= self.y_gravity
-
-            if self.jump_speed < -self.jump_height:
-                self.jumping = False
-                self.jump_speed = self.jump_height
+        self.apply_gravity()
 
 class Enemy():
     def __init__(self, x, y, width, height):
