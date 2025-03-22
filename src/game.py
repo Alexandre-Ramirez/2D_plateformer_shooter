@@ -293,6 +293,9 @@ while run:
             if event.key == pygame.K_ESCAPE:
                 current_state = "menu"
                 menu.enable()
+            if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+                print("jumping")
+                player1.jump()
         #if event.type == END_LOADING:
          #   menu._open(start_game)
 
@@ -313,9 +316,9 @@ while run:
             screen_scroll = player1.move(-player1.velocity, 0)
         if key[pygame.K_RIGHT]:
             screen_scroll = player1.move(player1.velocity, 0)
-        if key[pygame.K_UP] or key[pygame.K_SPACE]:
-            print("jump")
-            player1.jump()
+        #if key[pygame.K_UP] or key[pygame.K_SPACE]:
+         #   print("jump")
+          #  player1.jump()
 
         player1.reset()
 
@@ -332,6 +335,8 @@ while run:
         draw_bg(screen_scroll)
         # update background
         worlds.draw(screen_scroll)
+
+        player1.apply_gravity()
 
         player1.draw(screen)
         #enemy.draw(screen)

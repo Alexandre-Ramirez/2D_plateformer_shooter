@@ -103,7 +103,9 @@ class Player():
 
     def jump(self):
         if self.on_ground:
-            self.vel_y = -self.jump_height
+            print("Tentative de saut !")
+            self.vel_y = -15
+            #self.vel_y = -self.jump_height
             self.on_ground = False
 
     def apply_gravity(self):
