@@ -46,39 +46,13 @@ current_state = "game"
 selected_level = '1'
 selected_difficulty = 'Easy'
 
+
 #store tiles in a list
 img_list = []
 for x in range(TILE_TYPES):
     img = pygame.image.load(f'image/tile/{x}.png')
     img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
     img_list.append(img)
-
-class Worlds():
-    def __init__(self):
-        self.obstacles_list = []
-        #store tiles in a list
-
-    def proccess_data(self, data ):
-        #iterate through each value in level data file
-        for y, row in enumerate(data):
-            for x, tile in enumerate(row):
-                if tile >= 0:
-                    img = img_list[tile]
-                    img_rect = img.get_rect()
-                    img_rect.x = x * TILE_SIZE
-                    img_rect.y = y * TILE_SIZE
-                    tile_data = (img, img_rect)
-                    if tile >=0 and tile <= 8:
-                        self.obstacles_list.append(tile_data)
-                    elif tile >= 8 and tile <= 8:
-                        pass #decortion
-                    elif tile == 10: #create a player
-                        pass
-
-    def draw(self, screen_scroll):
-        for tile in self.obstacles_list:
-            tile[1][0] += screen_scroll
-            screen.blit(tile[0], tile[1])
 
 #create function for drawing bg
 def draw_bg(screen_scroll):
@@ -239,6 +213,9 @@ world.add.button("Start Game", start_game)
 
 #give the details about the player
 player1 = Player(100, 300, 1)
+player_direction = "right"
+
+#give details about the ennemi
 enemy = Enemy(200, 200, 50, 50)
 
 #define the collision
@@ -312,10 +289,16 @@ while run:
         # Afficher le jeu
         # movements of the player
         key = pygame.key.get_pressed()
+        moving = False
+
         if key[pygame.K_LEFT]:
             screen_scroll = player1.move(-player1.velocity, 0)
-        if key[pygame.K_RIGHT]:
+            direction = "left"
+            moving = True
+        elif key[pygame.K_RIGHT]:
             screen_scroll = player1.move(player1.velocity, 0)
+            direction = "right"
+            moving = True
         #if key[pygame.K_UP] or key[pygame.K_SPACE]:
          #   print("jump")
           #  player1.jump()
@@ -338,7 +321,7 @@ while run:
 
         player1.apply_gravity()
 
-        player1.draw(screen)
+        player1.draw(screen, "right")
         #enemy.draw(screen)
         #health_bar.draw(screen)
         # Remplacez ceci par votre logique de jeu
@@ -392,5 +375,22 @@ while run:
                     collision_occurred = True
                 else:
                     collision_occurred = False
+"""
+
+"""
+        # Gestion de l'animation (ralentie pour être plus fluide)
+        if moving:
+            anim_timer += 1
+            if anim_timer >= 5:  # Change d'image toutes les 5 frames
+                player_anim_index = (player_anim_index + 1) % len(walk_sprites_right)
+                anim_timer = 0
+        else:
+            player_anim_index = 0  # Revient à la première image si le joueur est immobile
+
+        #choose the sprite to draw
+        if player_direction == "right":
+            screen.blit(walk_sprites_right[player_anim_index], (player1.x, player1.y))
+        elif player_direction == "left":
+            screen.blit(walk_sprites_left[player_anim_index], (player1.x, player1.y))
 """
 #print(f"current state: {current_state}")

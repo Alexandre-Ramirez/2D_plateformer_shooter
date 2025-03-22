@@ -40,6 +40,41 @@ class Player():
         self.limite_x = (60, 1340)
         self.limite_y = (60, 740)
 
+        #sprite
+        #animation sprite
+        self.anim_index = 0
+        self.anim_timer = 0
+        # load the jump sprite
+        self.jump_sprites_right = [
+            pygame.image.load(f'image/player/sprite_1.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_2.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_3.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_4.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_5.png').convert_alpha(),
+        ]
+
+        self.jump_sprites_left = [pygame.transform.flip(img, True, False) for img in self.jump_sprites_right]
+
+        # load the walking sprite
+        self.walk_sprites_right = [
+            pygame.image.load(f'image/player/sprite_6.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_7.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_8.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_9.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_10.png').convert_alpha()
+        ]
+
+        self.walk_sprites_left = [pygame.transform.flip(img, True, False) for img in self.walk_sprites_right]
+
+    def update_anim(self, moving, player_direction):
+        if moving:
+            self.anim_timer += 1
+            if self.anim_timer >= 5:
+                self.anim_index = (self.anim_index + 1) % len(self.anim_index)
+                self.anim_timer = 0
+        else:
+            self.anim_timer = 0
+
     def update_hitbox(self):
         self.hitbox_player = pygame.Rect(
             self.x +(self.width-self.hitbox_w)//2,
@@ -48,9 +83,12 @@ class Player():
             self.hitbox_h
         )
 
-    def draw(self, surface):
-
-        surface.blit(self.player_image, self.rect)
+    def draw(self, surface, player_direction):
+        if player_direction == "right":
+            current_image = self.walk_sprites_right[self.anim_index]
+        elif player_direction == "left":
+            current_image = self.walk_sprites_left[self.anim_index]
+        surface.blit(current_image, (self.x, self.y))
         pygame.draw.rect(surface, 'black', self.hitbox_player,2)
 
     def move(self, dx, dy):
@@ -104,18 +142,18 @@ class Player():
     def jump(self):
         if self.on_ground:
             print("Tentative de saut !")
-            self.vel_y = -15
-            #self.vel_y = -self.jump_height
+            self.vel_y = -self.jump_height
             self.on_ground = False
 
     def apply_gravity(self):
         if not self.on_ground:
             self.vel_y += self.gravity
             self.y += self.vel_y
+            self.rect.topleft = (self.x, self.y)
 
-            if self.y >= 400:
+            if self.y <= 400:
                 self.y = 400
-                self.jumping = False
+                self.rect.topleft = (self.x, self.y)
                 self.on_ground = True
                 self.vel_y = 0
 
