@@ -77,8 +77,8 @@ class Platform:
 
 class Enemy:
     def __init__(self, platform):
-        self.width = 120
-        self.height = 120
+        self.width = 150
+        self.height = 150
         self.platform = platform
         self.rect = pygame.Rect(platform.rect.x + platform.rect.width // 2 - self.width // 2, platform.rect.y - self.height, self.width, self.height)
         self.speed = 1
@@ -102,8 +102,8 @@ class Enemy:
         else:
             self.hp = 80
 
-        self.hitbox_w = self.width
-        self.hitbox_h = self.height
+        self.hitbox_w = int(self.width * 0.3)
+        self.hitbox_h = int(self.height * 0.5)
         self.update_hitbox()
 
     def detect_player(self, player):
@@ -124,12 +124,14 @@ class Enemy:
 
     def update_hitbox(self):
         #met à jour la hitbox
-        self.hitbox_enemy = pygame.Rect (
-        self.rect.x + (self.width - self.hitbox_w) // 2,
-        self.rect.y + (self.height - self.hitbox_h) // 2,
-        self.hitbox_w,
-        self.hitbox_h
-    )
+        if self.direction == -1:
+            self.hitbox_enemy = pygame.Rect (self.rect.x + (self.width - self.hitbox_w) // 2 + 11, self.rect.y + (self.height - self.hitbox_h) // 2 + 38, self.hitbox_w, self.hitbox_h)
+        elif self.platform.platform_id == 11 and self.direction == -1:
+            self.hitbox_enemy = pygame.Rect(self.rect.x + (self.width - self.hitbox_w) // 2 + 25, self.rect.y + (self.height - self.hitbox_h) // 2 + 38, self.hitbox_w, self.hitbox_h)
+        elif self.platform.platform_id == 11 and self.direction == 1:
+            self.hitbox_enemy = pygame.Rect(self.rect.x + (self.width - self.hitbox_w) // 2 - 14, self.rect.y + (self.height - self.hitbox_h) // 2 + 38, self.hitbox_w, self.hitbox_h)
+        else:
+            self.hitbox_enemy = pygame.Rect(self.rect.x + (self.width - self.hitbox_w) // 2 - 8, self.rect.y + (self.height - self.hitbox_h) // 2 + 38, self.hitbox_w, self.hitbox_h)
 
     def draw(self, surface):
         if self.platform.platform_id in [9, 10]:
@@ -143,6 +145,7 @@ class Enemy:
             image = pygame.transform.flip(image, True, False)
 
         surface.blit(image, self.rect.topleft)
+        pygame.draw.rect(surface, (255, 0, 0), self.hitbox_enemy, 2)
 
 
     def update(self, player):
@@ -152,7 +155,8 @@ class Enemy:
         if not self.shooting:
             self.rect.x += self.speed * self.direction
         # patrolling pattern
-        if self.rect.left <= self.platform.rect.left or self.rect.right >= self.platform.rect.right:
+        #edge_offset = 2
+        if (self.hitbox_enemy.left <= self.platform.rect.left and self.direction == -1) or (self.hitbox_enemy.right >= self.platform.rect.right and self.direction == 1):
             self.direction *= -1
 
         self.update_hitbox()
@@ -209,17 +213,17 @@ player1 = Player(100, 300, 1)
 
 # Platforms creation with TILE_SIZE based coordinates
 platforms = [
-    Platform(40, 14, 5, 1, 1, visible=False),
-    Platform(45, 14, 5, 1, 2, visible=False),
-    Platform(57, 14, 5, 1, 3, visible=False),
-    Platform(62, 14, 5, 1, 4, visible=False),
-    Platform(72, 14, 4, 1, 5, visible=False),
+    Platform(26, 14, 11, 1, 1, visible=False),
+    Platform(40, 14, 10, 1, 2, visible=False),
+    Platform(54, 14, 7, 1, 3, visible=False),
+    Platform(61, 14, 6, 1, 4, visible=False),
+    Platform(79, 14, 8, 1, 5, visible=False),
     Platform(96, 14, 5, 1, 6, visible=False),
     Platform(99, 10, 5, 1, 7, visible=False),
     Platform(93, 8, 5, 1, 8, visible=False),
-    Platform(111, 7, 5, 1, 9, visible=False),
-    Platform(120, 7, 5, 1, 10, visible=False),
-    Platform(135, 14, 5, 1, 11, visible=False),
+    Platform(110, 7, 9, 1, 9, visible=False),
+    Platform(120, 7, 9, 1, 10, visible=False),
+    Platform(137, 14, 13, 1, 11, visible=False),
 ]
 
 # enemies creation
