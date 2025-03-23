@@ -87,8 +87,12 @@ class Enemy:
         self.shooting = False
         self.last_shot_time = 0
 
-        self.image = pygame.image.load("D:/Dev/Trimestre3/MA24/Projet_Pygame/2D_plateformer_shooter/src/Images_ennemis/Soldier_with_gun.png")
-        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        self.image1 = pygame.image.load("D:/Dev/Trimestre3/MA24/Projet_Pygame/2D_plateformer_shooter/src/Images_ennemis/Soldier_with_gun.png")
+        self.image1 = pygame.transform.scale(self.image1, (self.width, self.height))
+        self.image2 = pygame.image.load("D:/Dev/Trimestre3/MA24/Projet_Pygame/2D_plateformer_shooter/src/Images_ennemis/mid_grade_soldier_ak-47.png")
+        self.image2 = pygame.transform.scale(self.image2, (self.width, self.height))
+        self.image3 = pygame.image.load("D:/Dev/Trimestre3/MA24/Projet_Pygame/2D_plateformer_shooter/src/Images_ennemis/high_grade_soldier_44magnum.png")
+        self.image3 = pygame.transform.scale(self.image3, (self.width, self.height))
 
         self.hitbox_w = self.width
         self.hitbox_h = self.height
@@ -120,7 +124,13 @@ class Enemy:
     )
 
     def draw(self, surface):
-        surface.blit(self.image, self.rect.topleft)
+        if self.platform.platform_id in [9, 10]:
+            surface.blit(self.image2, self.rect.topleft)
+        elif self.platform.platform_id == 11:
+            surface.blit(self.image3, self.rect.topleft)
+        else:
+            surface.blit(self.image1, self.rect.topleft)
+
 
     def update(self, player):
         self.detect_player(player)
