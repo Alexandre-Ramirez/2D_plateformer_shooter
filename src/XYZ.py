@@ -233,14 +233,12 @@ while run:
     for event in events:
         if event.type == pygame.QUIT:
             run = False
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 run = False
-
-        # event : shoot when the key is pressed
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                bullets.append(Projectiles(round(player1.rect.x + player1.width // 2), round(player1.rect.y + player1.height // 2),5, (255, 255, 255), 1))
+            # event : shoot when the key is pressed
+            elif event.key == pygame.K_SPACE:
+                    bullets.append(Projectiles(round(player1.rect.x + player1.width // 2), round(player1.rect.y + player1.height // 2 + 25),5, (255, 255, 255), 1))
 
 
     # Handle movement
