@@ -187,7 +187,7 @@ while run:
     screen.fill((0, 0, 0))
     draw_bg(screen_scroll)
     worlds.draw(screen_scroll)
-    player1.draw(screen)
+    player1.draw(screen, "right")
     for platform in platforms:
         platform.draw(screen)
     for enemy in enemies:
