@@ -74,6 +74,88 @@ class Platform:
         if self.visible:
             pygame.draw.rect(surface, color, self.rect)
 
+
+class Enemy:
+    def __init__(self, platform):
+        self.width = 120
+        self.height = 120
+        self.platform = platform
+        self.rect = pygame.Rect(platform.rect.x + platform.rect.width // 2 - self.width // 2, platform.rect.y - self.height, self.width, self.height)
+        self.speed = 1
+        self.direction = 1
+        self.detection_range = 400
+        self.shooting = False
+        self.last_shot_time = 0
+
+        self.image = pygame.image.load("D:/Dev/Trimestre3/MA24/Projet_Pygame/2D_plateformer_shooter/src/Images_ennemis/Soldier_with_gun.png")
+        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+
+        self.hitbox_w = self.width
+        self.hitbox_h = self.height
+        self.update_hitbox()
+
+    def detect_player(self, player):
+        # measure the distance
+        distance_x = (self.rect.centerx - player.rect.centerx)
+        distance_y = (self.rect.centery - player.rect.centery)
+        y_detection_range = 0
+
+        # turn the enemy around and start shooting
+        if distance_x <= self.detection_range and distance_y <= y_detection_range:
+            self.shooting = True
+            if player.rect.centerx < self.rect.centerx:
+                self.direction = -1
+            else:
+                self.direction = 1
+        else:
+            self.shooting = False
+
+    def update_hitbox(self):
+        #met à jour la hitbox
+        self.hitbox_enemy = pygame.Rect (
+        self.rect.x + (self.width - self.hitbox_w) // 2,
+        self.rect.y + (self.height - self.hitbox_h) // 2,
+        self.hitbox_w,
+        self.hitbox_h
+    )
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect.topleft)
+
+    def update(self, player):
+        self.detect_player(player)
+
+        # movement when not shooting
+        if not self.shooting:
+            self.rect.x += self.speed * self.direction
+        # patrolling pattern
+        if self.rect.left <= self.platform.rect.left or self.rect.right >= self.platform.rect.right:
+            self.direction *= -1
+
+        self.update_hitbox()
+
+    def reset(self):
+        self.rect.topleft = (self.x, self.y)
+
+        self.update_hitbox()
+
+
+class Projectiles:
+    def __init__(self, x, y, radius, color, direction):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = color
+        self.direction = direction
+        self.velocity = 10 * direction
+
+    def update(self):
+        self.x += self.velocity
+
+    def draw(self, surface):
+        pygame.draw.circle(surface, self.color, (self.x, self.y), self.radius)
+
+
 # Create function for drawing bg
 def draw_bg(screen_scroll):
     screen.fill(GREEN)
@@ -124,7 +206,6 @@ for platform in platforms:
 
 # create projectiles
 bullets = []
-last_shot_time = 0
 shot_delay = 3000
 
 
@@ -167,18 +248,19 @@ while run:
     for bullet in bullets:
         bullet.x += screen_scroll
 
-    # enemies shoot at a 5sec delay
-    if enemies and current_time - last_shot_time >= shot_delay:
-        for enemy in enemies:
-            bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2), round(enemy.rect.y + enemy.height // 2), 5,(255, 255, 255), enemy.direction))
-        last_shot_time = current_time
 
-    # Update enemies and projectiles
+    # Update enemies + shooting if detecting the player
     for enemy in enemies:
-        enemy.update()
+        enemy.update(player1)
 
+        # enemies shoot at a 5sec delay
+        if enemy.shooting and current_time - enemy.last_shot_time >= shot_delay:
+                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2), round(enemy.rect.y + enemy.height // 2 + 35), 5,(255, 255, 255), enemy.direction))
+                enemy.last_shot_time = current_time
+
+    # Update bullets and pop if they go off-screen
     for bullet in bullets:
-        if bullet.x < 1200 and bullet.x > 0:
+        if 0 <= bullet.x <= screen_width:
             bullet.update()
         else:
             bullets.pop(bullets.index(bullet))
