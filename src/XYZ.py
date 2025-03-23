@@ -87,11 +87,11 @@ class Enemy:
         self.shooting = False
         self.last_shot_time = 0
 
-        self.image1 = pygame.image.load("D:/Dev/Trimestre3/MA24/Projet_Pygame/2D_plateformer_shooter/src/Images_ennemis/Soldier_with_gun.png")
+        self.image1 = pygame.image.load("Images_ennemis/base_soldier.png")
         self.image1 = pygame.transform.scale(self.image1, (self.width, self.height))
-        self.image2 = pygame.image.load("D:/Dev/Trimestre3/MA24/Projet_Pygame/2D_plateformer_shooter/src/Images_ennemis/mid_grade_soldier_ak-47.png")
+        self.image2 = pygame.image.load("Images_ennemis/mid-ak47.png")
         self.image2 = pygame.transform.scale(self.image2, (self.width, self.height))
-        self.image3 = pygame.image.load("D:/Dev/Trimestre3/MA24/Projet_Pygame/2D_plateformer_shooter/src/Images_ennemis/high_grade_soldier_44magnum.png")
+        self.image3 = pygame.image.load("Images_ennemis/high-magnum.png")
         self.image3 = pygame.transform.scale(self.image3, (self.width, self.height))
 
         self.hitbox_w = self.width
@@ -151,13 +151,14 @@ class Enemy:
 
 
 class Projectiles:
-    def __init__(self, x, y, radius, color, direction):
+    def __init__(self, x, y, radius, color, direction, shooter):
         self.x = x
         self.y = y
         self.radius = radius
         self.color = color
         self.direction = direction
         self.velocity = 10 * direction
+        self.shooter = shooter
 
     def update(self):
         self.x += self.velocity
@@ -238,7 +239,7 @@ while run:
                 run = False
             # event : shoot when the key is pressed
             elif event.key == pygame.K_SPACE:
-                    bullets.append(Projectiles(round(player1.rect.x + player1.width // 2), round(player1.rect.y + player1.height // 2 + 25),5, (255, 255, 255), 1))
+                    bullets.append(Projectiles(round(player1.rect.x + player1.width // 2), round(player1.rect.y + player1.height // 2 + 25),5, (255, 255, 255), 1, "player"))
 
 
     # Handle movement
@@ -263,15 +264,25 @@ while run:
 
         # enemies shoot at a 5sec delay
         if enemy.shooting and current_time - enemy.last_shot_time >= shot_delay:
-                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2), round(enemy.rect.y + enemy.height // 2 + 35), 5,(255, 255, 255), enemy.direction))
+                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2), round(enemy.rect.y + enemy.height // 2 + 35), 5,(255, 255, 255), enemy.direction, "enemy"))
                 enemy.last_shot_time = current_time
 
     # Update bullets and pop if they go off-screen
     for bullet in bullets:
+        bullet_rect = pygame.Rect(bullet.x - bullet.radius, bullet.y - bullet.radius, bullet.radius * 2, bullet.radius * 2)
+
         if 0 <= bullet.x <= screen_width:
             bullet.update()
         else:
-            bullets.pop(bullets.index(bullet))
+            bullets.remove(bullet)
+
+        if bullet.shooter == "player":
+            for enemy in enemies:
+                if bullet_rect.colliderect(enemy.hitbox_enemy):
+                    bullets.remove(bullet)
+                    break
+        elif bullet.shooter == "enemy" and bullet_rect.colliderect(player1.rect):
+            bullets.remove(bullet)
 
     # Draw everything
     screen.fill((0, 0, 0))
