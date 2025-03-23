@@ -94,6 +94,14 @@ class Enemy:
         self.image3 = pygame.image.load("Images_ennemis/high-magnum.png")
         self.image3 = pygame.transform.scale(self.image3, (self.width, self.height))
 
+        # Assign HP to the 3 enemy types
+        if platform.platform_id in [9, 10]:
+            self.hp = 120
+        elif platform.platform_id == 11:
+            self.hp = 160
+        else:
+            self.hp = 80
+
         self.hitbox_w = self.width
         self.hitbox_h = self.height
         self.update_hitbox()
@@ -279,7 +287,10 @@ while run:
         if bullet.shooter == "player":
             for enemy in enemies:
                 if bullet_rect.colliderect(enemy.hitbox_enemy):
+                    enemy.hp -= 20
                     bullets.remove(bullet)
+                    if enemy.hp <= 0:
+                        enemies.remove(enemy)
                     break
         elif bullet.shooter == "enemy" and bullet_rect.colliderect(player1.rect):
             bullets.remove(bullet)
