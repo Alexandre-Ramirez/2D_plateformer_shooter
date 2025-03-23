@@ -281,8 +281,11 @@ while run:
         enemy.update(player1)
 
         # enemies shoot at a 5sec delay
-        if enemy.shooting and current_time - enemy.last_shot_time >= shot_delay:
-                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2), round(enemy.rect.y + enemy.height // 2 + 35), 5,(255, 255, 255), enemy.direction, "enemy"))
+        if enemy.shooting and current_time - enemy.last_shot_time >= shot_delay and enemy.direction == 1:
+                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2 + 35), round(enemy.rect.y + enemy.height // 2 + 40), 5,(255, 255, 255), enemy.direction, "enemy"))
+                enemy.last_shot_time = current_time
+        elif enemy.shooting and current_time - enemy.last_shot_time >= shot_delay and enemy.direction == -1:
+                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2 - 35), round(enemy.rect.y + enemy.height // 2 + 40), 5,(255, 255, 255), enemy.direction, "enemy"))
                 enemy.last_shot_time = current_time
 
     # Update bullets and pop if they go off-screen
