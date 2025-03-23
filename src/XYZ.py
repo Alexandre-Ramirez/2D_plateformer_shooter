@@ -133,11 +133,16 @@ class Enemy:
 
     def draw(self, surface):
         if self.platform.platform_id in [9, 10]:
-            surface.blit(self.image2, self.rect.topleft)
+            image = self.image2
         elif self.platform.platform_id == 11:
-            surface.blit(self.image3, self.rect.topleft)
+            image = self.image3
         else:
-            surface.blit(self.image1, self.rect.topleft)
+            image = self.image1
+
+        if self.direction == 1:
+            image = pygame.transform.flip(image, True, False)
+
+        surface.blit(image, self.rect.topleft)
 
 
     def update(self, player):
