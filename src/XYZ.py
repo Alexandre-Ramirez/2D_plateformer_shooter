@@ -108,7 +108,7 @@ class Enemy:
 
     def detect_player(self, player):
         # measure the distance
-        distance_x = (self.rect.centerx - player.rect.centerx)
+        distance_x = abs(self.rect.centerx - player.rect.centerx)
         distance_y = (self.rect.centery - player.rect.centery)
         y_detection_range = 0
 
@@ -243,6 +243,7 @@ jumping = False
 # Main loop
 while run:
     screen_scroll = 0
+
     events = pygame.event.get()
 
     current_time = pygame.time.get_ticks()
