@@ -241,14 +241,20 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
             world_data[x][y] = int(tile)
 
 worlds = Worlds()
+worlds.proccess_data(world_data)
+
+#worlds = Worlds()
 
 #load data
-#data_level = world_data
+#data_level = worlds.load_level(1)
+#worlds.proccess_data(data_level)
 #data_level = img_list
 
-#call the function
-#my_world.proccess_data(data_level)
+#print(data_level)
 
+#call the function
+#my_world.proccess_data(img_list)
+#my_world.proccess_data(data_level)
 
 # Platforms creation with TILE_SIZE based coordinates
 platforms = [
@@ -349,7 +355,7 @@ while run:
             player1.update_action(1)  # Animation de marche
 
         elif keys[pygame.K_UP]:
-            player1.move(False, False, False, False, True, False)
+            player1.move(False, False, True, False, False, True)
 
         # Saut
         elif keys[pygame.K_DOWN]:
