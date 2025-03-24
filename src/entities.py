@@ -1,7 +1,6 @@
 import sys
 import os
 import pygame
-import math
 from environment import Worlds
 
 screen = pygame.display.set_mode((1400, 800))
@@ -38,19 +37,19 @@ class Player():
         self.frame_index = 0
         self.action = 0
         self.update_time = pygame.time.get_ticks()
-        #load all the image for the okayer
+        #load all the image for the player
         animation_types = ['idle', 'run', 'jump', 'crunch']
         for animation in animation_types:
             #reset temporary the list of image
             temp_list = []
             #count number of files in the folder
             folder_path = f'image/player/{animation}'
-
-            # Vérifie que le dossier existe avant de charger les images
+            #Check if the folder exist before charging the images
             if os.path.exists(folder_path):
-                # Récupère uniquement les fichiers PNG triés
+                #Take the orginise folder
                 files = sorted([f for f in os.listdir(folder_path) if f.endswith('.png')])
 
+                #load the images and scale them
                 for file in files:
                     img_path = os.path.join(folder_path, file)
                     img = pygame.image.load(img_path)
@@ -76,55 +75,56 @@ class Player():
         else:
             self.hitbox_player = pygame.Rect(self.rect.x + (self.width - self.hitbox_w) // 2 + 8, self.rect.y + (self.height - self.hitbox_h) // 2 + 35, self.hitbox_w, self.hitbox_h)
 
+    #draw the player on the screen
     def draw(self, surface):
         surface.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
         pygame.draw.rect(surface, (255, 0, 0), self.hitbox_player, 2)
 
+    #function to move the player
     def move(self, moving_l, moving_r,moving_h,moving_d, jumping, on_ground):
 
-        screen_scroll = 0
+        screen_scroll = 0 #scroll the screen
+        dx=0 #x position
+        dy=0 #y position
 
-        dx=0
-        dy=0
-
+        #move left
         if moving_l:
             dx = -self.velocity
             self.flip = True
             self.direction = -1
+        #move right
         if moving_r:
             dx = self.velocity
             self.flip = False
             self.direction = 1
+        #move up
         if moving_h:
             dy = -self.velocity
             self.flip = False
             self.direction = -1
+        #move down
         if moving_d:
             dy = self.velocity
             self.flip = False
             self.direction = 1
+        #jump
         if jumping and on_ground == False:
             self.vel_y = -11
             self.jump = False
             self.in_air = True
 
-            """
-            self.vel_y += 0.75
-            if self.vel_y > 10:
-                self.vel_y
-            dy += self.vel_y
-            """
             if not self.on_ground:
                 self.vel_y += self.gravity
                 self.y += self.vel_y
                 self.rect.topleft = (self.x, self.y)
 
-            # check collision with floor
             """
+             # check collision with floor
             if self.rect.bottom + dy > 300:
                 dy = 300 - self.rect.bottom
                 self.in_air = False
             """
+            #check the collision
             print(f"Liste des obstacle: {my_world.obstacles_list}")
             # check collision with obstacle
             for tile in my_world.obstacles_list:
@@ -148,20 +148,15 @@ class Player():
             self.rect.x += dx
             self.rect.y += dy
 
-
-
-
-
-
-        #garde l'ancienne position avant le déplacement
+        #keep the old positioning before moving
         old_x = self.x
         old_y = self.y
 
-        #déplacement
+        #update the movement
         self.x += dx
         self.y += dy
 
-        # Màj du joueur
+        # update the player
         self.rect.topleft = (self.x, self.y)
         self.update_hitbox()
 
@@ -170,90 +165,15 @@ class Player():
             self.rect.x -= -dx
             screen_scroll = -dx
 
-        #vérif des limites
+        #check the limits
         if self.rect.left < self.limite_x[0] or self.rect.right > self.limite_x[1]:
             self.x = old_x
-            #self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
         if self.rect.top < self.limite_y[0] or self.rect.bottom > self.limite_y[1]:
             self.y = old_y
-            #self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
         return screen_scroll
 
-    """
-    def jumps(self):
-        print(f"{self.y}")
-        if not self.jumping:
-            self.vel_y = self.jump_speed
-            self.jumping = True
-
-        if self.jumping:
-            self.vel_y += self.y_gravity
-            self.y += self.vel_y
-
-            if self.y >= 400:
-                self.y = 400
-                self.jumping = False
-                #self.update_hitbox()
-                self.vel_y = 0
-
-    def jump(self):
-        if self.on_ground:
-            print("Tentative de saut !")
-            self.vel_y = -self.jump_height
-            self.on_ground = False
-
-    def apply_gravity(self):
-        if not self.on_ground:
-            self.vel_y += self.gravity
-            self.y += self.vel_y
-            self.rect.topleft = (self.x, self.y)
-
-        #check collision with obstacle
-        for tile in my_world.obstacles_list:
-            # Impression pour voir la position du joueur et des obstacles
-            print(f"Joueur - Rect : ({self.rect.x}, {self.rect.y}), Vitesse Y : {self.vel_y}")
-            print(f"Obstacle - Rect : ({tile[1].x}, {tile[1].y}), Taille : ({tile[1].width}, {tile[1].height})")
-            #check for colision in the y direction
-            if tile[1].colliderect(self.rect.x, self.rect.y + self.vel_y, self.width, self.height):
-                print(f"Collision détectée !")
-                if self.vel_y > 0: #player falling
-                    self.y = tile[1].top - self.height #put the player on top of the obstacle
-                    self.vel_y = 0 #stop the falling
-                    self.on_ground = True #the player is on the ground
-                    break
-                elif self.vel_y < 0: #the player jump
-                    self.y = tile[1].bottom #the player goes on top of the obstacle
-                    self.vel_y = 0 #stop the movement
-                    break
-
-        self.rect.topleft = (self.x, self.y)
-        #self.update_hitbox()
-
-        ###
-            #check for colision in the y direction
-            if tile[0].colliderect(self.rect.x, self.rect.y + self.y, self.width, self.height):
-                #check if below the ground, jumping
-                if self.vel_y < 0:
-                    self.vel_y = 0
-                    dy = tile[1].bottom - self.rect.top
-                #check if above the ground, falling
-                elif self.vel_y >= 0:
-                    self.vel_y = 0
-                    dy = tile[1].top - self.rect.bottom
-
-        self.rect.x += dx
-        self.rect.y += dy
-
-            if self.y >= 400:
-                self.y = 400
-                self.rect.topleft = (self.x, self.y) --> a voir
-                self.jumping = False
-                self.on_ground = True
-                self.vel_y = 0
-    
-    """
     def update_animation(self):
         #update aniation
         ANIMATION_COOLDOWN = 100
@@ -280,8 +200,6 @@ class Player():
         self.x = self.x
         self.y = self.y
         self.rect.topleft = (self.x, self.y)
-        #self.update_hitbox()
-        #self.apply_gravity()
 
 class Enemy:
     def __init__(self, platform):
@@ -499,7 +417,3 @@ class Projectiles:
 
     def draw(self, surface):
         pygame.draw.circle(surface, self.color, (self.x, self.y), self.radius)
-
-pygame.init()
-
-velocity = 12

@@ -4,6 +4,7 @@ import csv
 #setup pygame
 screen = pygame.display.set_mode((1400, 800),pygame.RESIZABLE)
 screen_width, screen_height = screen.get_size()
+
 #define game variable
 ROWS = 16
 COLS = 150
@@ -12,6 +13,7 @@ TILE_TYPES = 12
 
 # defining gravity value
 gravity = 9.81
+
 #store tiles in a list
 img_list = []
 for x in range(TILE_TYPES):
@@ -38,8 +40,7 @@ class Platform:
 
 class Worlds():
     def __init__(self):
-        self.obstacles_list = []
-        #store tiles in a list
+        self.obstacles_list = [] #store tiles in a list
 
     # create empty tyle list
     def load_level(self, level):
@@ -52,9 +53,6 @@ class Worlds():
             reader = csv.reader(csvfile, delimiter=';')
             for row in reader:
                 world_data.append([int(tile) for tile in row])
-            # for x, row in enumerate(reader):
-            # for y, tile in enumerate(row):
-            # world_data[x][y] = int(tile)
         return world_data
 
     def proccess_data(self, data):
@@ -86,12 +84,3 @@ class Worlds():
         for tile in self.obstacles_list:
             tile[1][0] += screen_scroll
             screen.blit(tile[0], tile[1])
-
-
-
-# Création des plateformes: à priori à mettre dans la boucle, après l'initiation de Pygame
-#platforms = [
-    #Platform(200, 175, 400, 50),
-    #Platform(700, 350, 350, 50),
-    #Platform(350, 550, 250, 50, moving=True, speed=3, move_range=250)
-#]
