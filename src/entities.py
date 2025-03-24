@@ -112,7 +112,7 @@ class Player():
     def draw(self, surface):
         surface.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
-    def move(self, moving_l, moving_r, jumping, on_ground):
+    def move(self, moving_l, moving_r,moving_h,moving_d, jumping, on_ground):
 
         screen_scroll = 0
 
@@ -125,6 +125,14 @@ class Player():
             self.direction = -1
         if moving_r:
             dx = self.velocity
+            self.flip = False
+            self.direction = 1
+        if moving_h:
+            dy = self.velocity
+            self.flip = False
+            self.direction = -1
+        if moving_d:
+            dy = -self.velocity
             self.flip = False
             self.direction = 1
         if jumping and on_ground == False:
@@ -242,74 +250,91 @@ class Player():
         #self.update_hitbox()
         self.apply_gravity()
 
-class Enemy():
-    def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.velocity = velocity - 4
+class Enemy:
+    def __init__(self, platform):
+        self.width = 150
+        self.height = 150
+        self.platform = platform
+        self.rect = pygame.Rect(platform.rect.x + platform.rect.width // 2 - self.width // 2, platform.rect.y - self.height, self.width, self.height)
+        self.speed = 1
+        self.direction = 1
+        self.detection_range = 400
+        self.shooting = False
+        self.last_shot_time = 0
 
-        self.hitbox_w = width + 5
-        self.hitbox_h = height + 5
+        self.image1 = pygame.image.load("Images_ennemis/base_soldier.png")
+        self.image1 = pygame.transform.scale(self.image1, (self.width, self.height))
+        self.image2 = pygame.image.load("Images_ennemis/mid-ak47.png")
+        self.image2 = pygame.transform.scale(self.image2, (self.width, self.height))
+        self.image3 = pygame.image.load("Images_ennemis/high-magnum.png")
+        self.image3 = pygame.transform.scale(self.image3, (self.width, self.height))
+
+        # Assign HP to the 3 enemy types
+        if platform.platform_id in [9, 10]:
+            self.hp = 120
+        elif platform.platform_id == 11:
+            self.hp = 160
+        else:
+            self.hp = 80
+
+        self.hitbox_w = int(self.width * 0.3)
+        self.hitbox_h = int(self.height * 0.5)
         self.update_hitbox()
+
+    def detect_player(self, player):
+        # measure the distance
+        distance_x = abs(self.rect.centerx - player.rect.centerx)
+        distance_y = (self.rect.centery - player.rect.centery)
+        y_detection_range = 0
+
+        # turn the enemy around and start shooting
+        if distance_x <= self.detection_range and distance_y <= y_detection_range:
+            self.shooting = True
+            if player.rect.centerx < self.rect.centerx:
+                self.direction = -1
+            else:
+                self.direction = 1
+        else:
+            self.shooting = False
 
     def update_hitbox(self):
         #met à jour la hitbox
-        self.hitbox_enemy = pygame.Rect (
-        self.rect.x + (self.width - self.hitbox_w) // 2,
-        self.rect.y + (self.height - self.hitbox_h) // 2,
-        self.hitbox_w,
-        self.hitbox_h
-    )
+        if self.direction == -1:
+            self.hitbox_enemy = pygame.Rect (self.rect.x + (self.width - self.hitbox_w) // 2 + 11, self.rect.y + (self.height - self.hitbox_h) // 2 + 38, self.hitbox_w, self.hitbox_h)
+        elif self.platform.platform_id == 11 and self.direction == -1:
+            self.hitbox_enemy = pygame.Rect(self.rect.x + (self.width - self.hitbox_w) // 2 + 25, self.rect.y + (self.height - self.hitbox_h) // 2 + 38, self.hitbox_w, self.hitbox_h)
+        elif self.platform.platform_id == 11 and self.direction == 1:
+            self.hitbox_enemy = pygame.Rect(self.rect.x + (self.width - self.hitbox_w) // 2 - 14, self.rect.y + (self.height - self.hitbox_h) // 2 + 38, self.hitbox_w, self.hitbox_h)
+        else:
+            self.hitbox_enemy = pygame.Rect(self.rect.x + (self.width - self.hitbox_w) // 2 - 8, self.rect.y + (self.height - self.hitbox_h) // 2 + 38, self.hitbox_w, self.hitbox_h)
 
-    def draw(self, window):
+    def draw(self, surface):
+        if self.platform.platform_id in [9, 10]:
+            image = self.image2
+        elif self.platform.platform_id == 11:
+            image = self.image3
+        else:
+            image = self.image1
 
-        pygame.draw.rect(window, 'green', self.rect)
-        pygame.draw.rect(window, 'black', self.hitbox_enemy, 2)
+        if self.direction == 1:
+            image = pygame.transform.flip(image, True, False)
 
-    def move (self, dx, dy):
-        #on garde l'ancienne position
-        old_ex, old_ey = self.x, self.y
+        surface.blit(image, self.rect.topleft)
+        pygame.draw.rect(surface, (255, 0, 0), self.hitbox_enemy, 2)
 
-        self.rect.x += dx * velocity
-        self.rect.y += dy * velocity
 
-        self.limite_x = (60, 1340)
-        self.limite_y = (60, 740)
+    def update(self, player):
+        self.detect_player(player)
 
-        #MàJ de l'ennemie
-        #self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-
-        if self.rect.left < self.limite_x[0] or self.rect.right > self.limite_x[1]:
-            self.rect.x = old_ex
-            #self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-
-        if self.rect.top < self.limite_y[0] or self.rect.bottom > self.limite_y[1]:
-            self.rect.y = old_ey
-            #self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        # movement when not shooting
+        if not self.shooting:
+            self.rect.x += self.speed * self.direction
+        # patrolling pattern
+        #edge_offset = 2
+        if (self.hitbox_enemy.left <= self.platform.rect.left and self.direction == -1) or (self.hitbox_enemy.right >= self.platform.rect.right and self.direction == 1):
+            self.direction *= -1
 
         self.update_hitbox()
-
-    def move_towards_player(self, player, ):
-        #calculer la direction vers le joueur
-        dx = player.rect.x - self.rect.x
-        dy = player.rect.y - self.rect.y
-
-        #calculer la distance entre l'ennemi et le joueur
-        dist = math.hypot(dx, dy)
-
-        # Enemy AI: Move towards the player
-        if dist != 0:
-            dx /= dist
-            dy /= dist
-
-            #déplacer l'ennemi
-            self.rect.x += dx * (self.velocity -2)
-            self.rect.y += dy * (self.velocity -2)
-
-            self.update_hitbox()
 
     def reset(self):
         self.rect.topleft = (self.x, self.y)
@@ -426,6 +451,22 @@ class Collide_damage():
             screen.blit(death_screen, (death_screen_x, death_screen_y))
 
             pygame.display.flip()
+
+class Projectiles:
+    def __init__(self, x, y, radius, color, direction, shooter):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = color
+        self.direction = direction
+        self.velocity = 10 * direction
+        self.shooter = shooter
+
+    def update(self):
+        self.x += self.velocity
+
+    def draw(self, surface):
+        pygame.draw.circle(surface, self.color, (self.x, self.y), self.radius)
 
 pygame.init()
 

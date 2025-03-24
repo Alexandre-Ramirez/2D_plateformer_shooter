@@ -216,7 +216,7 @@ player1 = Player(100, 300, 1, 5)
 player_direction = "right"
 
 #give details about the ennemi
-enemy = Enemy(200, 200, 50, 50)
+#enemy = Enemy(200, 200, 50, 50)
 
 #define the collision
 collide_damage = Collide_damage(x=0, y=0, max_damage=10)
@@ -243,12 +243,38 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
 worlds = Worlds()
 worlds.proccess_data(world_data)
 
+# Platforms creation with TILE_SIZE based coordinates
+platforms = [
+    Platform(26, 14, 11, 1, 1, visible=False),
+    Platform(40, 14, 10, 1, 2, visible=False),
+    Platform(54, 14, 7, 1, 3, visible=False),
+    Platform(61, 14, 6, 1, 4, visible=False),
+    Platform(79, 14, 8, 1, 5, visible=False),
+    Platform(96, 14, 5, 1, 6, visible=False),
+    Platform(99, 10, 5, 1, 7, visible=False),
+    Platform(93, 8, 5, 1, 8, visible=False),
+    Platform(110, 7, 9, 1, 9, visible=False),
+    Platform(120, 7, 9, 1, 10, visible=False),
+    Platform(137, 14, 13, 1, 11, visible=False),
+]
+
+# enemies creation
+enemies = []
+
+for platform in platforms:
+    enemies.append(Enemy(platform))
+
+# create projectiles
+bullets = []
+shot_delay = 3000
+
 run = True
 jumping = False
 #main loop
 while run:
     screen_scroll = 0
     #print(f"current state {current_state}")
+    current_time = pygame.time.get_ticks()
 
     #define the characteristic
     events = pygame.event.get()
@@ -265,6 +291,11 @@ while run:
             if event.key == pygame.K_ESCAPE:
                 current_state = "menu"
                 menu.enable()
+                # event : shoot when the key is pressed
+            elif event.key == pygame.K_SPACE:
+                bullets.append(Projectiles(round(player1.rect.x + player1.rect.x // 2),
+                                       round(player1.rect.y + player1.rect.y // 2 + 25), 5, (255, 255, 255), 1,
+                                       "player"))
        #     if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
       #          print("jumping")
      #           player1.jumping = True
@@ -291,29 +322,83 @@ while run:
 
 
             # movements of the player
-        key = pygame.key.get_pressed()
+        keys = pygame.key.get_pressed()
         moving = False
         moving_l = False
         jumping = False
         on_ground = True
 
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    screen_scroll = player1.move(True, False,False, True)
-                    player1.update_action(1)  # moving
-                if event.key == pygame.K_RIGHT:
-                    screen_scroll = player1.move(False, True, False, True)
-                    player1.update_action(1) #moving
-                if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
-                    print("jump")
-                    player1.move(True, False,True, False)
-                    player1.update_action(2) #jump
+        # Mouvement gauche
+        if keys[pygame.K_LEFT]:
+            screen_scroll = player1.move(True, False, False, False,False, True)
+            player1.update_action(1)  # Animation de marche
 
-            if event.type == pygame.KEYUP:
-                if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_SPACE]:
-                    player1.move(False, False,False, True)
-                    player1.update_action(0) #no move
+        # Mouvement droite
+        elif keys[pygame.K_RIGHT]:
+            screen_scroll = player1.move(False, True,False, False ,False, True)
+            player1.update_action(1)  # Animation de marche
+
+        elif keys[pygame.K_UP]:
+            player1.move(False, True, True, False, False, True)
+
+        # Saut
+        elif keys[pygame.K_DOWN]:
+            player1.move(False, True, False, True, False, True)
+
+            """
+            print("jump")
+            player1.move(False, False, True, False)
+            player1.update_action(2)  # Animation de saut
+            """
+
+        # Si aucune touche n'est pressée, remettre l'animation à 0 (idle)
+        else:
+            player1.update_action(0)
+
+        # apply scroll to everything
+        for platform in platforms:
+            platform.update_position(screen_scroll)
+        for enemy in enemies:
+            enemy.rect.x += screen_scroll
+        for bullet in bullets:
+            bullet.x += screen_scroll
+
+        # Update enemies + shooting if detecting the player
+        for enemy in enemies:
+            enemy.update(player1)
+
+            # enemies shoot at a 5sec delay
+            if enemy.shooting and current_time - enemy.last_shot_time >= shot_delay and enemy.direction == 1:
+                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2 + 35),
+                                           round(enemy.rect.y + enemy.height // 2 + 40), 5, (255, 255, 255),
+                                           enemy.direction, "enemy"))
+                enemy.last_shot_time = current_time
+            elif enemy.shooting and current_time - enemy.last_shot_time >= shot_delay and enemy.direction == -1:
+                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2 - 35),
+                                           round(enemy.rect.y + enemy.height // 2 + 40), 5, (255, 255, 255),
+                                           enemy.direction, "enemy"))
+                enemy.last_shot_time = current_time
+
+        # Update bullets and pop if they go off-screen
+        for bullet in bullets:
+            bullet_rect = pygame.Rect(bullet.x - bullet.radius, bullet.y - bullet.radius, bullet.radius * 2,
+                                      bullet.radius * 2)
+
+            if 0 <= bullet.x <= screen_width:
+                bullet.update()
+            else:
+                bullets.remove(bullet)
+
+            if bullet.shooter == "player":
+                for enemy in enemies:
+                    if bullet_rect.colliderect(enemy.hitbox_enemy):
+                        enemy.hp -= 20
+                        bullets.remove(bullet)
+                        if enemy.hp <= 0:
+                            enemies.remove(enemy)
+                        break
+            elif bullet.shooter == "enemy" and bullet_rect.colliderect(player1.rect):
+                bullets.remove(bullet)
 
         player1.update_animation()
         player1.reset()
@@ -327,6 +412,12 @@ while run:
         player1.apply_gravity()
 
         player1.draw(screen)
+        for platform in platforms:
+            platform.draw(screen)
+        for enemy in enemies:
+            enemy.draw(screen)
+        for bullet in bullets:
+            bullet.draw(screen)
             # enemy.draw(screen)
             # health_bar.draw(screen)
             # Remplacez ceci par votre logique de jeu

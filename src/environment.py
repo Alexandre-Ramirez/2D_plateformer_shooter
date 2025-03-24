@@ -19,24 +19,20 @@ for x in range(TILE_TYPES):
     img_list.append(img)
 
 class Platform:
-    def __init__(self, x, y, width, height, moving=False, speed=2, move_range=100):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.moving = moving
-        self.speed = speed
-        self.move_range = move_range
-        self.start_x = x  # initial position
-        self.direction = 1  # 1 = right, -1 = left
+    def __init__(self, grid_x, grid_y, width_in_blocks, height_in_blocks, platform_id=None, visible=True):
+        self.tile_size = TILE_SIZE
+        self.rect = pygame.Rect(grid_x * self.tile_size, grid_y * self.tile_size, width_in_blocks * self.tile_size, height_in_blocks * self.tile_size)
+        self.platform_id = platform_id
+        self.visible = visible
 
-    def update(self):
-        # updates the mobile platform's position
-        if self.moving:
-            self.rect.x += self.speed * self.direction
-            if abs(self.rect.x - self.start_x) >= self.move_range:
-                self.direction *= -1  # invert the direction
+    def update_position(self, screen_scroll):
+        self.rect.x += screen_scroll
 
-    def draw(self, surface, color=(255, 255, 255)):
-        # draws the platform
-        pygame.draw.rect(surface, color, self.rect)
+    def draw(self, surface, color=(255, 0, 0)):
+        if self.visible:
+            pygame.draw.rect(surface, color, self.rect)
+
+
 
 class Worlds():
     def __init__(self):
