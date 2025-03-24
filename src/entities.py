@@ -14,16 +14,13 @@ class Player():
     def __init__(self,x, y, scale, velocity):
         self.x = x
         self.y = y
+        self.width = 140
+        self.height  = 140
         self.flip = False
         self.velocity = velocity
         self.direction = 1
         self.screen_width = 1400
         self.SCROLL_THRESH = 200
-
-        #hitbox
-        #self.hitbox_w = self.width + 5
-        #self.hitbox_h = self.height + 5
-        #self.update_hitbox()
 
         #add jumping
         self.jumping = False
@@ -58,13 +55,18 @@ class Player():
                 for file in files:
                     img_path = os.path.join(folder_path, file)
                     img = pygame.image.load(img_path)
-                    img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+                    img = pygame.transform.scale(img, (self.width, self.height))
                     temp_list.append(img)
                 self.animation_list.append(temp_list)
 
         self.image = self.animation_list[self.action][self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x,y)
+
+        # hitbox
+        self.hitbox_w = int(self.width * 0.3)
+        self.hitbox_h = int(self.height * 0.5)
+        self.update_hitbox()
 
         """
         self.anim_index = 0
@@ -109,8 +111,13 @@ class Player():
         )
     """
 
+    def update_hitbox(self):
+        #met à jour la hitbox
+        self.hitbox_player = pygame.Rect (self.rect.x + (self.width - self.hitbox_w) // 2, self.rect.y + (self.height - self.hitbox_h) // 2 + 35, self.hitbox_w, self.hitbox_h)
+
     def draw(self, surface):
         surface.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+        pygame.draw.rect(surface, (255, 0, 0), self.hitbox_player, 2)
 
     def move(self, moving_l, moving_r,moving_h,moving_d, jumping, on_ground):
 
@@ -169,7 +176,7 @@ class Player():
 
         # Màj du joueur
         self.rect.topleft = (self.x, self.y)
-        #self.update_hitbox()
+        self.update_hitbox()
 
         #maj scroll based on player position
         if self.rect.right > self.screen_width - self.SCROLL_THRESH or self.rect.left < self.SCROLL_THRESH:
@@ -283,14 +290,14 @@ class Enemy:
 
     def detect_player(self, player):
         # measure the distance
-        distance_x = abs(self.rect.centerx - player.rect.centerx)
-        distance_y = (self.rect.centery - player.rect.centery)
+        distance_x = abs(self.hitbox_enemy.centerx - player.hitbox_player.centerx)
+        distance_y = (self.hitbox_enemy.centery - player.hitbox_player.centery)
         y_detection_range = 0
 
         # turn the enemy around and start shooting
         if distance_x <= self.detection_range and distance_y <= y_detection_range:
             self.shooting = True
-            if player.rect.centerx < self.rect.centerx:
+            if player.hitbox_player.centerx < self.hitbox_enemy.centerx:
                 self.direction = -1
             else:
                 self.direction = 1
