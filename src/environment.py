@@ -37,7 +37,8 @@ class Worlds():
         self.obstacles_list = []
         #store tiles in a list
 
-    def proccess_data(self, data ):
+    def proccess_data(self, data):
+        print("process data")
         #iterate through each value in level data file
         for y, row in enumerate(data):
             for x, tile in enumerate(row):

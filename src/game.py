@@ -7,7 +7,7 @@ from pygame_menu.examples.simple import start_the_game, set_difficulty
 import time
 import csv
 from src.entities import *
-#from src.environment import *
+from src.environment import *
 import os
 
 pygame.init()
@@ -241,7 +241,14 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
             world_data[x][y] = int(tile)
 
 worlds = Worlds()
-worlds.proccess_data(world_data)
+
+#load data
+#data_level = world_data
+data_level = img_list
+
+#call the function
+my_world.proccess_data(data_level)
+
 
 # Platforms creation with TILE_SIZE based coordinates
 platforms = [
@@ -314,11 +321,6 @@ while run:
     elif current_state == "game":
         # Afficher le jeu
         # movements of the player
-        key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT]:
-            screen_scroll = player1.move(-player1.velocity, 0)
-        if key[pygame.K_RIGHT]:
-            screen_scroll = player1.move(player1.velocity, 0)
 
             #Afficher le jeu
         #if player1.move(False, False,True, False):
@@ -347,11 +349,11 @@ while run:
             player1.update_action(1)  # Animation de marche
 
         elif keys[pygame.K_UP]:
-            player1.move(False, True, True, False, False, True)
+            player1.move(False, False, False, False, True, False)
 
         # Saut
         elif keys[pygame.K_DOWN]:
-            player1.move(False, True, False, True, False, True)
+            player1.move(False, False, False, True, False, True)
 
             """
             print("jump")
@@ -417,7 +419,7 @@ while run:
         # update background
         worlds.draw(screen_scroll)
 
-        player1.apply_gravity()
+        #player1.apply_gravity()
 
         player1.draw(screen)
         for platform in platforms:
