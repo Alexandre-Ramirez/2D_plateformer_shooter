@@ -1,3 +1,4 @@
+
 #sleep permet de suspendre l'exécution d'un programme pendant une durée spécifique
 from time import sleep
 import pygame
@@ -6,8 +7,8 @@ from pygame_menu import themes
 from pygame_menu.examples.simple import start_the_game, set_difficulty
 import time
 import csv
-from src.entities import *
-from src.environment import *
+from src.perso.B_entities import *
+from src.perso.B_environment import *
 import os
 
 pygame.init()
@@ -19,7 +20,7 @@ screen_width, screen_height = screen.get_size()
 ROWS = 16
 COLS = 150
 TILE_SIZE = screen_height // ROWS
-TILE_TYPES = 9
+TILE_TYPES = 3
 level = 1
 SCROLL_THRESH = 200
 #screen_scroll = 0
@@ -30,10 +31,10 @@ WHITE = (255, 255, 255)
 RED = (200, 25, 25)
 
 #load images
-pine1_image = pygame.image.load(f'image/backgroud/pine1.png').convert_alpha()
-pine2_image = pygame.image.load(f'image/backgroud/pine2.png').convert_alpha()
-mountain_image = pygame.image.load(f'image/backgroud/mountain.png').convert_alpha()
-sky_image = pygame.image.load(f'image/backgroud/sky_cloud.png').convert_alpha()
+pine1_image = pygame.image.load(f'image/background/pine1.png').convert_alpha()
+pine2_image = pygame.image.load(f'image/background/pine2.png').convert_alpha()
+mountain_image = pygame.image.load(f'image/background/mountain.png').convert_alpha()
+sky_image = pygame.image.load(f'image/background/sky_cloud.png').convert_alpha()
 
 #setup window's title
 pygame.display.set_caption("Plateformer")
@@ -212,7 +213,7 @@ world.add.button("Back", pygame_menu.events.BACK)
 world.add.button("Start Game", start_game)
 
 #give the details about the player
-player1 = Player(100, 300, 1, 5)
+player1 = Player(100, 300, 1)
 player_direction = "right"
 
 #give details about the ennemi
@@ -257,17 +258,22 @@ while run:
     #Enemy = entities.Enemy
 
     for event in events:
-        #quit pygame
+        if event.type == update_loading:
+            progress = loading.get_widget("1")
+            progress.set_value(progress.get_value() + 1)
+            if progress.get_value() == 100:
+                pygame.time.set_timer(update_loading, 0)
+                current_state = "game"
+                loading.disable()
         if event.type == pygame.QUIT:
             run = False
-        #keyboard presses
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 current_state = "menu"
                 menu.enable()
-       #     if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
-      #          print("jumping")
-     #           player1.jumping = True
+            if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+                print("jumping")
+                player1.jump()
         #if event.type == END_LOADING:
          #   menu._open(start_game)
 
@@ -281,44 +287,52 @@ while run:
             # if (menu.get_current().get_selected_widget()):
             #   arrow.draw(screen, menu.get_current().get_selected_widget())
     elif current_state == "game":
-            #Afficher le jeu
-        if player1.move(False, False,True, False):
-            player1.update_action(2)
-        elif player1.move(True, False,False, True) or player1.move(False, True,False, True):
-            player1.update_action(1)
-        else:
-            player1.update_action(0)
-
-
-            # movements of the player
+        # Afficher le jeu
+        # movements of the player
         key = pygame.key.get_pressed()
         moving = False
-        moving_l = False
 
         if key[pygame.K_LEFT]:
-            screen_scroll = player1.move(True, False,False, True)
-        if key[pygame.K_RIGHT]:
-            screen_scroll = player1.move(False, True, False, True)
-        if key[pygame.K_UP] or key[pygame.K_SPACE]:
-            print("jump")
-            player1.move(True, False,True, False)
+            screen_scroll = player1.move(-player1.velocity, 0)
+            direction = "left"
+            moving = True
+        elif key[pygame.K_RIGHT]:
+            screen_scroll = player1.move(player1.velocity, 0)
+            direction = "right"
+            moving = True
+        #if key[pygame.K_UP] or key[pygame.K_SPACE]:
+         #   print("jump")
+          #  player1.jump()
 
-        player1.update_animation()
         player1.reset()
 
-            # Ici, vous pouvez gérer la logique du jeu
-            # draw at the screen
+            #jumping = True
+        if key[pygame.K_DOWN]:
+            player1.move(0, player1.velocity)
+
+         #       if jumping:
+#            player1.jump()
+            #Player.jump(player1, 1, TILE_SIZE * 2, TILE_SIZE * 2)
+
+        # Ici, vous pouvez gérer la logique du jeu
+        # draw at the screen
         draw_bg(screen_scroll)
         # update background
         worlds.draw(screen_scroll)
 
         player1.apply_gravity()
 
-        player1.draw(screen)
-            # enemy.draw(screen)
-            # health_bar.draw(screen)
-            # Remplacez ceci par votre logique de jeu
+        player1.draw(screen, "right")
+        #enemy.draw(screen)
+        #health_bar.draw(screen)
+        # Remplacez ceci par votre logique de jeu
+        # Exemple : Dessiner un texte pour indiquer que le jeu est en cours
+        #font = pygame.font.Font(None, 74)
+        #text = font.render(f"Level {selected_level} - Difficulty: {selected_difficulty}", True, (255, 255, 255))
+        #screen.blit(text, (screen_width // 2 - 250, screen_height // 2))
 
+        # Enemy AI: Move towards the player
+        enemy.move_towards_player(player1)
 
     pygame.display.flip()
     pygame.display.update()
@@ -379,12 +393,5 @@ while run:
             screen.blit(walk_sprites_right[player_anim_index], (player1.x, player1.y))
         elif player_direction == "left":
             screen.blit(walk_sprites_left[player_anim_index], (player1.x, player1.y))
-        if event.type == update_loading:
-            progress = loading.get_widget("1")
-            progress.set_value(progress.get_value() + 1)
-            if progress.get_value() == 100:
-                pygame.time.set_timer(update_loading, 0)
-                current_state = "game"
-                loading.disable()
 """
 #print(f"current state: {current_state}")

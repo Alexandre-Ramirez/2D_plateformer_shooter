@@ -1,11 +1,11 @@
 from PIL import Image
 
 # Charger l'image originale
-image_path = "image/player/soldier_walking.png"  # Remplace par le chemin de ton fichier
+image_path = "image/player/soldier_no_moove.png"  # Remplace par le chemin de ton fichier
 image = Image.open(image_path)
 
 # Définir le nombre de sprites
-nombre_sprites = 5  # Change ce nombre si besoin
+nombre_sprites = 3  # Change ce nombre si besoin
 
 # Calculer la largeur d'un sprite (si les sprites sont alignés horizontalement)
 sprite_width = image.width // nombre_sprites
@@ -17,6 +17,6 @@ for i in range(nombre_sprites):
     right = left + sprite_width
     sprite = image.crop((left, 0, right, sprite_height))
 
-    sprite_filename = f"sprite_{i + 6}.png"
+    sprite_filename = f"sprite_{i + 11}.png"
     sprite.save(sprite_filename)
-    print(f"Sprite {i + 6} enregistré sous {sprite_filename}")
+    print(f"Sprite {i + 11} enregistré sous {sprite_filename}")

@@ -1,5 +1,6 @@
+
 import sys
-import os
+
 import pygame
 import math
 
@@ -11,19 +12,23 @@ screen = pygame.display.set_mode((1400, 800))
 screen_width, screen_height = screen.get_size()
 
 class Player():
-    def __init__(self,x, y, scale, velocity):
+    def __init__(self, x, y, scale):
         self.x = x
         self.y = y
-        self.flip = False
+        self.scale = scale
+        self.player_image = pygame.image.load('image/player/sprite_8.png')
+        self.width = self.player_image.get_width()
+        self.height = self.player_image.get_height()
         self.velocity = velocity
-        self.direction = 1
+        self.rect = self.player_image.get_rect()
+        self.rect.center = (self.x, self.y)
         self.screen_width = 1400
         self.SCROLL_THRESH = 200
 
         #hitbox
-        #self.hitbox_w = self.width + 5
-        #self.hitbox_h = self.height + 5
-        #self.update_hitbox()
+        self.hitbox_w = self.width + 5
+        self.hitbox_h = self.height + 5
+        self.update_hitbox()
 
         #add jumping
         self.jumping = False
@@ -38,44 +43,15 @@ class Player():
 
         #sprite
         #animation sprite
-        self.animation_list = []
-        self.frame_index = 0
-        self.action = 0
-        self.update_time = pygame.time.get_ticks()
-        #load all the image for the okayer
-        animation_types = ['idle', 'run', 'jump', 'crunch']
-        for animation in animation_types:
-            #reset temporary the list of image
-            temp_list = []
-            #count number of files in the folder
-            folder_path = f'image/player/{animation}'
-
-            # Vérifie que le dossier existe avant de charger les images
-            if os.path.exists(folder_path):
-                # Récupère uniquement les fichiers PNG triés
-                files = sorted([f for f in os.listdir(folder_path) if f.endswith('.png')])
-
-                for file in files:
-                    img_path = os.path.join(folder_path, file)
-                    img = pygame.image.load(img_path)
-                    img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
-                    temp_list.append(img)
-                self.animation_list.append(temp_list)
-
-        self.image = self.animation_list[self.action][self.frame_index]
-        self.rect = self.image.get_rect()
-        self.rect.center = (x,y)
-
-        """
         self.anim_index = 0
         self.anim_timer = 0
         # load the jump sprite
         self.jump_sprites_right = [
-            pygame.image.load(f'image/player/sprite_1.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_2.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_3.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_4.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_5.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_6.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_7.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_8.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_9.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_10.png').convert_alpha(),
         ]
 
         self.jump_sprites_left = [pygame.transform.flip(img, True, False) for img in self.jump_sprites_right]
@@ -90,7 +66,7 @@ class Player():
         ]
 
         self.walk_sprites_left = [pygame.transform.flip(img, True, False) for img in self.walk_sprites_right]
-        
+
     def update_anim(self, moving, player_direction):
         if moving:
             self.anim_timer += 1
@@ -99,7 +75,7 @@ class Player():
                 self.anim_timer = 0
         else:
             self.anim_timer = 0
-    
+
     def update_hitbox(self):
         self.hitbox_player = pygame.Rect(
             self.x +(self.width-self.hitbox_w)//2,
@@ -107,49 +83,18 @@ class Player():
             self.hitbox_w,
             self.hitbox_h
         )
-    """
 
-    def draw(self, surface):
-        surface.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+    def draw(self, surface, player_direction):
+        if player_direction == "right":
+            current_image = self.walk_sprites_right[self.anim_index]
+        elif player_direction == "left":
+            current_image = self.walk_sprites_left[self.anim_index]
+        surface.blit(current_image, (self.x, self.y))
+        pygame.draw.rect(surface, 'black', self.hitbox_player,2)
 
-    def move(self, moving_l, moving_r, jumping, on_ground):
+    def move(self, dx, dy):
 
         screen_scroll = 0
-
-        dx=0
-        dy=0
-
-        if moving_l:
-            dx = -self.velocity
-            self.flip = True
-            self.direction = -1
-        if moving_r:
-            dx = self.velocity
-            self.flip = False
-            self.direction = 1
-        if jumping and on_ground == False:
-            self.vel_y = -11
-            self.jump = False
-            self.in_air = True
-
-            self.vel_y += 0.75
-            if self.vel_y > 10:
-                self.vel_y
-            dy += self.vel_y
-
-            # check collision with floor
-            if self.rect.bottom + dy > 300:
-                dy = 300 - self.rect.bottom
-                self.in_air = False
-
-            # update rectangle position
-            self.rect.x += dx
-            self.rect.y += dy
-
-
-
-
-
 
         #garde l'ancienne position avant le déplacement
         old_x = self.x
@@ -161,7 +106,7 @@ class Player():
 
         # Màj du joueur
         self.rect.topleft = (self.x, self.y)
-        #self.update_hitbox()
+        self.update_hitbox()
 
         #maj scroll based on player position
         if self.rect.right > self.screen_width - self.SCROLL_THRESH or self.rect.left < self.SCROLL_THRESH:
@@ -213,33 +158,11 @@ class Player():
                 self.on_ground = True
                 self.vel_y = 0
 
-    def update_animation(self):
-        #update aniation
-        ANIMATION_COOLDOWN = 100
-        #update image depending on current frame
-        self.image = self.animation_list[self.action][self.frame_index]
-        #check if enough time has passed since the last update
-        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
-            self.update_time = pygame.time.get_ticks()
-            self.frame_index += 1
-        #if the animation has run out the reset back to the start
-        if self.frame_index >= len(self.animation_list[self.action]):
-            self.frame_index = 0
-
-    def update_action(self, new_action):
-        # check if the new action is different to the previous one
-        if new_action != self.action:
-            self.action = new_action
-            # update the animation settings
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-
-
     def reset(self):
         self.x = self.x
         self.y = self.y
         self.rect.topleft = (self.x, self.y)
-        #self.update_hitbox()
+        self.update_hitbox()
         self.apply_gravity()
 
 class Enemy():
