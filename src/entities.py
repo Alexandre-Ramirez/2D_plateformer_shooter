@@ -68,6 +68,8 @@ class Player():
         self.hitbox_h = int(self.height * 0.5)
         self.update_hitbox()
 
+        self.hp = 100
+
         """
         self.anim_index = 0
         self.anim_timer = 0

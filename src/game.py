@@ -398,7 +398,10 @@ while run:
                             enemies.remove(enemy)
                         break
             elif bullet.shooter == "enemy" and bullet_rect.colliderect(player1.hitbox_player):
+                player1.hp -= 20
                 bullets.remove(bullet)
+                if player1.hp <= 0:
+                    run = False
 
         player1.update_animation()
         player1.reset()
