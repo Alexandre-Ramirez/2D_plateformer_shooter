@@ -1,11 +1,7 @@
-#sleep permet de suspendre l'exécution d'un programme pendant une durée spécifique
-from time import sleep
 import pygame
 import pygame_menu
 from pygame_menu import themes
 from pygame_menu.examples.simple import start_the_game, set_difficulty
-import time
-import csv
 from src.entities import *
 from src.environment import *
 import os
@@ -243,6 +239,13 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
 worlds = Worlds()
 worlds.proccess_data(world_data)
 
+"""
+worlds = Worlds()
+
+world_data = worlds.load_level(1)
+worlds.proccess_data(world_data)
+#worlds.proccess_data(img in img_list)
+
 #worlds = Worlds()
 
 #load data
@@ -255,6 +258,7 @@ worlds.proccess_data(world_data)
 #call the function
 #my_world.proccess_data(img_list)
 #my_world.proccess_data(data_level)
+"""
 
 # Platforms creation with TILE_SIZE based coordinates
 platforms = [
@@ -427,6 +431,7 @@ while run:
         draw_bg(screen_scroll)
         # update background
         worlds.draw(screen_scroll)
+
 
         #player1.apply_gravity()
 

@@ -8,7 +8,7 @@ screen_width, screen_height = screen.get_size()
 ROWS = 16
 COLS = 150
 TILE_SIZE = screen_height // ROWS
-TILE_TYPES = 9
+TILE_TYPES = 12
 
 # defining gravity value
 gravity = 9.81
@@ -19,6 +19,8 @@ for x in range(TILE_TYPES):
     img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
     img_list.append(img)
 
+for img in img_list:
+    print(f"Image size: {img.get_width()}x{img.get_height()}")
 
 class Platform:
     def __init__(self, grid_x, grid_y, width_in_blocks, height_in_blocks, platform_id=None, visible=True):
@@ -63,9 +65,11 @@ class Worlds():
                 if tile >= 0:
                     img = img_list[tile]
                     img_rect = img.get_rect()
-                    img_rect.x = x * TILE_SIZE
-                    img_rect.y = y * TILE_SIZE
+                    img_rect.x = (x * TILE_SIZE)
+                    img_rect.y = (y * TILE_SIZE)
+                    print(f"Tile at ({img_rect.x}, {img_rect.y})")  # Affiche les coordonnées de la tuile
                     tile_data = (img, img_rect)
+
                     if tile == 0:
                         self.obstacles_list.append(tile_data)
                     elif tile >=0 and tile <= 8:
@@ -74,6 +78,9 @@ class Worlds():
                         pass #decortion
                     elif tile == 10: #create a player
                         pass
+
+        # Affichage pour vérifier que les tuiles ont été ajoutées
+        print(f"Obstacles list contains {len(self.obstacles_list)} tiles")
 
     def draw(self, screen_scroll):
         for tile in self.obstacles_list:

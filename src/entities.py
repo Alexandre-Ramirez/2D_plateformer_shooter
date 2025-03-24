@@ -19,7 +19,7 @@ class Player():
         self.velocity = velocity
         self.direction = 1
         self.screen_width = 1400
-        self.SCROLL_THRESH = 200
+        self.SCROLL_THRESH = self.screen_width / 2
 
         #add jumping
         self.jumping = False
@@ -68,49 +68,6 @@ class Player():
         self.update_hitbox()
 
         self.hp = 100
-
-        """
-        self.anim_index = 0
-        self.anim_timer = 0
-        # load the jump sprite
-        self.jump_sprites_right = [
-            pygame.image.load(f'image/player/sprite_1.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_2.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_3.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_4.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_5.png').convert_alpha(),
-        ]
-
-        self.jump_sprites_left = [pygame.transform.flip(img, True, False) for img in self.jump_sprites_right]
-
-        # load the walking sprite
-        self.walk_sprites_right = [
-            pygame.image.load(f'image/player/sprite_6.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_7.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_8.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_9.png').convert_alpha(),
-            pygame.image.load(f'image/player/sprite_10.png').convert_alpha()
-        ]
-
-        self.walk_sprites_left = [pygame.transform.flip(img, True, False) for img in self.walk_sprites_right]
-        
-    def update_anim(self, moving, player_direction):
-        if moving:
-            self.anim_timer += 1
-            if self.anim_timer >= 5:
-                self.anim_index = (self.anim_index + 1) % len(self.anim_index)
-                self.anim_timer = 0
-        else:
-            self.anim_timer = 0
-    
-    def update_hitbox(self):
-        self.hitbox_player = pygame.Rect(
-            self.x +(self.width-self.hitbox_w)//2,
-            self.y +(self.height - self.hitbox_h)//2,
-            self.hitbox_w,
-            self.hitbox_h
-        )
-    """
 
     def update_hitbox(self):
         #met à jour la hitbox
