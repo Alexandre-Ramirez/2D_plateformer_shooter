@@ -292,10 +292,10 @@ while run:
                 current_state = "menu"
                 menu.enable()
                 # event : shoot when the key is pressed
-            elif event.key == pygame.K_SPACE:
-                bullets.append(Projectiles(round(player1.rect.x + player1.width // 2 + 30),
-                                       round(player1.rect.y + player1.height // 2 + 30), 5, (255, 255, 255), 1,
-                                       "player"))
+            elif event.key == pygame.K_SPACE and player1.direction == 1:
+                bullets.append(Projectiles(round(player1.rect.x + player1.width // 2 + 35), round(player1.rect.y + player1.height // 2 + 35), 5, (255, 255, 255), player1.direction,"player"))
+            elif event.key == pygame.K_SPACE and player1.direction == -1:
+                bullets.append(Projectiles(round(player1.rect.x + player1.width // 2 - 35), round(player1.rect.y + player1.height // 2 + 35), 5, (255, 255, 255), player1.direction,"player"))
        #     if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
       #          print("jumping")
      #           player1.jumping = True
