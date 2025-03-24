@@ -67,6 +67,8 @@ class Player():
         self.hitbox_h = int(self.height * 0.5)
         self.update_hitbox()
 
+        self.hp = 100
+
         """
         self.anim_index = 0
         self.anim_timer = 0
@@ -355,11 +357,10 @@ class Enemy:
     def detect_player(self, player):
         # measure the distance
         distance_x = abs(self.hitbox_enemy.centerx - player.hitbox_player.centerx)
-        distance_y = (self.hitbox_enemy.centery - player.hitbox_player.centery)
-        y_detection_range = 0
+        vertical_overlap = (player.hitbox_player.bottom >= self.hitbox_enemy.top and player.hitbox_player.top <= self.hitbox_enemy.bottom)
 
         # turn the enemy around and start shooting
-        if distance_x <= self.detection_range and distance_y <= y_detection_range:
+        if distance_x <= self.detection_range and vertical_overlap:
             self.shooting = True
             if player.hitbox_player.centerx < self.hitbox_enemy.centerx:
                 self.direction = -1
