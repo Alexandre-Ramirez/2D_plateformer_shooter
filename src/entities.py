@@ -65,7 +65,7 @@ class Player():
 
         # hitbox
         self.hitbox_w = int(self.width * 0.3)
-        self.hitbox_h = int(self.height * 0.5)
+        self.hitbox_h = int(self.height * 0.5 + 5)
         self.update_hitbox()
 
         self.hp = 100
@@ -115,7 +115,10 @@ class Player():
 
     def update_hitbox(self):
         #met à jour la hitbox
-        self.hitbox_player = pygame.Rect (self.rect.x + (self.width - self.hitbox_w) // 2, self.rect.y + (self.height - self.hitbox_h) // 2 + 35, self.hitbox_w, self.hitbox_h)
+        if self.direction == 1:
+            self.hitbox_player = pygame.Rect (self.rect.x + (self.width - self.hitbox_w) // 2 - 8, self.rect.y + (self.height - self.hitbox_h) // 2 + 35, self.hitbox_w, self.hitbox_h)
+        else:
+            self.hitbox_player = pygame.Rect(self.rect.x + (self.width - self.hitbox_w) // 2 + 8, self.rect.y + (self.height - self.hitbox_h) // 2 + 35, self.hitbox_w, self.hitbox_h)
 
     def draw(self, surface):
         surface.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
