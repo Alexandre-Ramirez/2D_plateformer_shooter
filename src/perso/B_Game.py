@@ -1,3 +1,4 @@
+
 #sleep permet de suspendre l'exécution d'un programme pendant une durée spécifique
 from time import sleep
 import pygame
@@ -6,8 +7,8 @@ from pygame_menu import themes
 from pygame_menu.examples.simple import start_the_game, set_difficulty
 import time
 import csv
-from src.entities import *
-#from src.environment import *
+from src.perso.B_entities import *
+from src.perso.B_environment import *
 import os
 
 pygame.init()
@@ -19,7 +20,7 @@ screen_width, screen_height = screen.get_size()
 ROWS = 16
 COLS = 150
 TILE_SIZE = screen_height // ROWS
-TILE_TYPES = 9
+TILE_TYPES = 3
 level = 1
 SCROLL_THRESH = 200
 #screen_scroll = 0
@@ -30,10 +31,10 @@ WHITE = (255, 255, 255)
 RED = (200, 25, 25)
 
 #load images
-pine1_image = pygame.image.load(f'image/backgroud/pine1.png').convert_alpha()
-pine2_image = pygame.image.load(f'image/backgroud/pine2.png').convert_alpha()
-mountain_image = pygame.image.load(f'image/backgroud/mountain.png').convert_alpha()
-sky_image = pygame.image.load(f'image/backgroud/sky_cloud.png').convert_alpha()
+pine1_image = pygame.image.load(f'image/background/pine1.png').convert_alpha()
+pine2_image = pygame.image.load(f'image/background/pine2.png').convert_alpha()
+mountain_image = pygame.image.load(f'image/background/mountain.png').convert_alpha()
+sky_image = pygame.image.load(f'image/background/sky_cloud.png').convert_alpha()
 
 #setup window's title
 pygame.display.set_caption("Plateformer")
@@ -212,11 +213,11 @@ world.add.button("Back", pygame_menu.events.BACK)
 world.add.button("Start Game", start_game)
 
 #give the details about the player
-player1 = Player(100, 300, 1, 5)
+player1 = Player(100, 300, 1)
 player_direction = "right"
 
 #give details about the ennemi
-#enemy = Enemy(200, 200, 50, 50)
+enemy = Enemy(200, 200, 50, 50)
 
 #define the collision
 collide_damage = Collide_damage(x=0, y=0, max_damage=10)
@@ -243,38 +244,12 @@ with open(f'level{level}_data.csv', newline='') as csvfile:
 worlds = Worlds()
 worlds.proccess_data(world_data)
 
-# Platforms creation with TILE_SIZE based coordinates
-platforms = [
-    Platform(26, 14, 11, 1, 1, visible=False),
-    Platform(40, 14, 10, 1, 2, visible=False),
-    Platform(54, 14, 7, 1, 3, visible=False),
-    Platform(61, 14, 6, 1, 4, visible=False),
-    Platform(79, 14, 8, 1, 5, visible=False),
-    Platform(96, 14, 5, 1, 6, visible=False),
-    Platform(99, 10, 5, 1, 7, visible=False),
-    Platform(93, 8, 5, 1, 8, visible=False),
-    Platform(110, 7, 9, 1, 9, visible=False),
-    Platform(120, 7, 9, 1, 10, visible=False),
-    Platform(137, 14, 13, 1, 11, visible=False),
-]
-
-# enemies creation
-enemies = []
-
-for platform in platforms:
-    enemies.append(Enemy(platform))
-
-# create projectiles
-bullets = []
-shot_delay = 3000
-
 run = True
 jumping = False
 #main loop
 while run:
     screen_scroll = 0
     #print(f"current state {current_state}")
-    current_time = pygame.time.get_ticks()
 
     #define the characteristic
     events = pygame.event.get()
@@ -283,22 +258,22 @@ while run:
     #Enemy = entities.Enemy
 
     for event in events:
-        #quit pygame
+        if event.type == update_loading:
+            progress = loading.get_widget("1")
+            progress.set_value(progress.get_value() + 1)
+            if progress.get_value() == 100:
+                pygame.time.set_timer(update_loading, 0)
+                current_state = "game"
+                loading.disable()
         if event.type == pygame.QUIT:
             run = False
-        #keyboard presses
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 current_state = "menu"
                 menu.enable()
-                # event : shoot when the key is pressed
-            elif event.key == pygame.K_SPACE:
-                bullets.append(Projectiles(round(player1.rect.x + player1.rect.x // 2),
-                                       round(player1.rect.y + player1.rect.y // 2 + 25), 5, (255, 255, 255), 1,
-                                       "player"))
-       #     if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
-      #          print("jumping")
-     #           player1.jumping = True
+            if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+                print("jumping")
+                player1.jump()
         #if event.type == END_LOADING:
          #   menu._open(start_game)
 
@@ -315,101 +290,29 @@ while run:
         # Afficher le jeu
         # movements of the player
         key = pygame.key.get_pressed()
+        moving = False
+
         if key[pygame.K_LEFT]:
             screen_scroll = player1.move(-player1.velocity, 0)
-        if key[pygame.K_RIGHT]:
+            direction = "left"
+            moving = True
+        elif key[pygame.K_RIGHT]:
             screen_scroll = player1.move(player1.velocity, 0)
+            direction = "right"
+            moving = True
+        #if key[pygame.K_UP] or key[pygame.K_SPACE]:
+         #   print("jump")
+          #  player1.jump()
 
-            #Afficher le jeu
-        #if player1.move(False, False,True, False):
-            #player1.update_action(2) #jump
-        #if player1.move(True, False,False, True) or player1.move(False, True,False, True):
-         #   player1.update_action(1) #moving
-        #else:
-         #   player1.update_action(0)
-
-
-            # movements of the player
-        keys = pygame.key.get_pressed()
-        moving = False
-        moving_l = False
-        jumping = False
-        on_ground = True
-
-        # Mouvement gauche
-        if keys[pygame.K_LEFT]:
-            screen_scroll = player1.move(True, False, False, False,False, True)
-            player1.update_action(1)  # Animation de marche
-
-        # Mouvement droite
-        elif keys[pygame.K_RIGHT]:
-            screen_scroll = player1.move(False, True,False, False ,False, True)
-            player1.update_action(1)  # Animation de marche
-
-        elif keys[pygame.K_UP]:
-            player1.move(False, True, True, False, False, True)
-
-        # Saut
-        elif keys[pygame.K_DOWN]:
-            player1.move(False, True, False, True, False, True)
-
-            """
-            print("jump")
-            player1.move(False, False, True, False)
-            player1.update_action(2)  # Animation de saut
-            """
-
-        # Si aucune touche n'est pressée, remettre l'animation à 0 (idle)
-        else:
-            player1.update_action(0)
-
-        # apply scroll to everything
-        for platform in platforms:
-            platform.update_position(screen_scroll)
-        for enemy in enemies:
-            enemy.rect.x += screen_scroll
-        for bullet in bullets:
-            bullet.x += screen_scroll
-
-        # Update enemies + shooting if detecting the player
-        for enemy in enemies:
-            enemy.update(player1)
-
-            # enemies shoot at a 5sec delay
-            if enemy.shooting and current_time - enemy.last_shot_time >= shot_delay and enemy.direction == 1:
-                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2 + 35),
-                                           round(enemy.rect.y + enemy.height // 2 + 40), 5, (255, 255, 255),
-                                           enemy.direction, "enemy"))
-                enemy.last_shot_time = current_time
-            elif enemy.shooting and current_time - enemy.last_shot_time >= shot_delay and enemy.direction == -1:
-                bullets.append(Projectiles(round(enemy.rect.x + enemy.width // 2 - 35),
-                                           round(enemy.rect.y + enemy.height // 2 + 40), 5, (255, 255, 255),
-                                           enemy.direction, "enemy"))
-                enemy.last_shot_time = current_time
-
-        # Update bullets and pop if they go off-screen
-        for bullet in bullets:
-            bullet_rect = pygame.Rect(bullet.x - bullet.radius, bullet.y - bullet.radius, bullet.radius * 2,
-                                      bullet.radius * 2)
-
-            if 0 <= bullet.x <= screen_width:
-                bullet.update()
-            else:
-                bullets.remove(bullet)
-
-            if bullet.shooter == "player":
-                for enemy in enemies:
-                    if bullet_rect.colliderect(enemy.hitbox_enemy):
-                        enemy.hp -= 20
-                        bullets.remove(bullet)
-                        if enemy.hp <= 0:
-                            enemies.remove(enemy)
-                        break
-            elif bullet.shooter == "enemy" and bullet_rect.colliderect(player1.rect):
-                bullets.remove(bullet)
-
-        player1.update_animation()
         player1.reset()
+
+            #jumping = True
+        if key[pygame.K_DOWN]:
+            player1.move(0, player1.velocity)
+
+         #       if jumping:
+#            player1.jump()
+            #Player.jump(player1, 1, TILE_SIZE * 2, TILE_SIZE * 2)
 
         # Ici, vous pouvez gérer la logique du jeu
         # draw at the screen
@@ -419,17 +322,17 @@ while run:
 
         player1.apply_gravity()
 
-        player1.draw(screen)
-        for platform in platforms:
-            platform.draw(screen)
-        for enemy in enemies:
-            enemy.draw(screen)
-        for bullet in bullets:
-            bullet.draw(screen)
-            # enemy.draw(screen)
-            # health_bar.draw(screen)
-            # Remplacez ceci par votre logique de jeu
+        player1.draw(screen, "right")
+        #enemy.draw(screen)
+        #health_bar.draw(screen)
+        # Remplacez ceci par votre logique de jeu
+        # Exemple : Dessiner un texte pour indiquer que le jeu est en cours
+        #font = pygame.font.Font(None, 74)
+        #text = font.render(f"Level {selected_level} - Difficulty: {selected_difficulty}", True, (255, 255, 255))
+        #screen.blit(text, (screen_width // 2 - 250, screen_height // 2))
 
+        # Enemy AI: Move towards the player
+        enemy.move_towards_player(player1)
 
     pygame.display.flip()
     pygame.display.update()
@@ -490,12 +393,5 @@ while run:
             screen.blit(walk_sprites_right[player_anim_index], (player1.x, player1.y))
         elif player_direction == "left":
             screen.blit(walk_sprites_left[player_anim_index], (player1.x, player1.y))
-        if event.type == update_loading:
-            progress = loading.get_widget("1")
-            progress.set_value(progress.get_value() + 1)
-            if progress.get_value() == 100:
-                pygame.time.set_timer(update_loading, 0)
-                current_state = "game"
-                loading.disable()
 """
 #print(f"current state: {current_state}")
