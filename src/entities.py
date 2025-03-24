@@ -213,11 +213,11 @@ class Enemy:
         self.shooting = False
         self.last_shot_time = 0
 
-        self.image1 = pygame.image.load("Images_ennemis/base_soldier.png")
+        self.image1 = pygame.image.load("image/enemy/base_soldier.png")
         self.image1 = pygame.transform.scale(self.image1, (self.width, self.height))
-        self.image2 = pygame.image.load("Images_ennemis/mid-ak47.png")
+        self.image2 = pygame.image.load("image/enemy/mid-ak47.png")
         self.image2 = pygame.transform.scale(self.image2, (self.width, self.height))
-        self.image3 = pygame.image.load("Images_ennemis/high-magnum.png")
+        self.image3 = pygame.image.load("image/enemy/high-magnum.png")
         self.image3 = pygame.transform.scale(self.image3, (self.width, self.height))
 
         # Assign HP to the 3 enemy types
