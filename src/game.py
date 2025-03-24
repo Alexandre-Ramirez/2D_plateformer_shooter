@@ -244,10 +244,10 @@ worlds = Worlds()
 
 #load data
 #data_level = world_data
-data_level = img_list
+#data_level = img_list
 
 #call the function
-my_world.proccess_data(data_level)
+#my_world.proccess_data(data_level)
 
 
 # Platforms creation with TILE_SIZE based coordinates
@@ -300,8 +300,8 @@ while run:
                 menu.enable()
                 # event : shoot when the key is pressed
             elif event.key == pygame.K_SPACE:
-                bullets.append(Projectiles(round(player1.rect.x + player1.rect.x // 2),
-                                       round(player1.rect.y + player1.rect.y // 2 + 25), 5, (255, 255, 255), 1,
+                bullets.append(Projectiles(round(player1.rect.x + player1.width // 2 + 30),
+                                       round(player1.rect.y + player1.height // 2 + 30), 5, (255, 255, 255), 1,
                                        "player"))
        #     if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
       #          print("jumping")
@@ -407,7 +407,7 @@ while run:
                         if enemy.hp <= 0:
                             enemies.remove(enemy)
                         break
-            elif bullet.shooter == "enemy" and bullet_rect.colliderect(player1.rect):
+            elif bullet.shooter == "enemy" and bullet_rect.colliderect(player1.hitbox_player):
                 bullets.remove(bullet)
 
         player1.update_animation()

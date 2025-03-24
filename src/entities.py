@@ -13,18 +13,15 @@ class Player():
     def __init__(self,x, y, scale, velocity):
         self.x = x
         self.y = y
+        self.width = 140
+        self.height  = 140
         self.flip = False
         self.velocity = velocity
         self.direction = 1
         self.screen_width = 1400
         self.SCROLL_THRESH = 200
 
-        #hitbox
-        #self.hitbox_w = self.width + 5
-        #self.hitbox_h = self.height + 5
-        #self.update_hitbox()
-
-        #jump
+        #add jumping
         self.jumping = False
         self.vel_y = 0
         self.jump_height = 15
@@ -57,7 +54,7 @@ class Player():
                 for file in files:
                     img_path = os.path.join(folder_path, file)
                     img = pygame.image.load(img_path)
-                    img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+                    img = pygame.transform.scale(img, (self.width, self.height))
                     temp_list.append(img)
                 self.animation_list.append(temp_list)
 
@@ -65,8 +62,61 @@ class Player():
         self.rect = self.image.get_rect()
         self.rect.center = (x,y)
 
+        # hitbox
+        self.hitbox_w = int(self.width * 0.3)
+        self.hitbox_h = int(self.height * 0.5)
+        self.update_hitbox()
+
+        """
+        self.anim_index = 0
+        self.anim_timer = 0
+        # load the jump sprite
+        self.jump_sprites_right = [
+            pygame.image.load(f'image/player/sprite_1.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_2.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_3.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_4.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_5.png').convert_alpha(),
+        ]
+
+        self.jump_sprites_left = [pygame.transform.flip(img, True, False) for img in self.jump_sprites_right]
+
+        # load the walking sprite
+        self.walk_sprites_right = [
+            pygame.image.load(f'image/player/sprite_6.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_7.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_8.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_9.png').convert_alpha(),
+            pygame.image.load(f'image/player/sprite_10.png').convert_alpha()
+        ]
+
+        self.walk_sprites_left = [pygame.transform.flip(img, True, False) for img in self.walk_sprites_right]
+        
+    def update_anim(self, moving, player_direction):
+        if moving:
+            self.anim_timer += 1
+            if self.anim_timer >= 5:
+                self.anim_index = (self.anim_index + 1) % len(self.anim_index)
+                self.anim_timer = 0
+        else:
+            self.anim_timer = 0
+    
+    def update_hitbox(self):
+        self.hitbox_player = pygame.Rect(
+            self.x +(self.width-self.hitbox_w)//2,
+            self.y +(self.height - self.hitbox_h)//2,
+            self.hitbox_w,
+            self.hitbox_h
+        )
+    """
+
+    def update_hitbox(self):
+        #met à jour la hitbox
+        self.hitbox_player = pygame.Rect (self.rect.x + (self.width - self.hitbox_w) // 2, self.rect.y + (self.height - self.hitbox_h) // 2 + 35, self.hitbox_w, self.hitbox_h)
+
     def draw(self, surface):
         surface.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+        pygame.draw.rect(surface, (255, 0, 0), self.hitbox_player, 2)
 
     def move(self, moving_l, moving_r,moving_h,moving_d, jumping, on_ground):
 
@@ -136,6 +186,11 @@ class Player():
             self.rect.x += dx
             self.rect.y += dy
 
+
+
+
+
+
         #garde l'ancienne position avant le déplacement
         old_x = self.x
         old_y = self.y
@@ -146,7 +201,7 @@ class Player():
 
         # Màj du joueur
         self.rect.topleft = (self.x, self.y)
-        #self.update_hitbox()
+        self.update_hitbox()
 
         #maj scroll based on player position
         if self.rect.right > self.screen_width - self.SCROLL_THRESH or self.rect.left < self.SCROLL_THRESH:
@@ -299,14 +354,14 @@ class Enemy:
 
     def detect_player(self, player):
         # measure the distance
-        distance_x = abs(self.rect.centerx - player.rect.centerx)
-        distance_y = (self.rect.centery - player.rect.centery)
+        distance_x = abs(self.hitbox_enemy.centerx - player.hitbox_player.centerx)
+        distance_y = (self.hitbox_enemy.centery - player.hitbox_player.centery)
         y_detection_range = 0
 
         # turn the enemy around and start shooting
         if distance_x <= self.detection_range and distance_y <= y_detection_range:
             self.shooting = True
-            if player.rect.centerx < self.rect.centerx:
+            if player.hitbox_player.centerx < self.hitbox_enemy.centerx:
                 self.direction = -1
             else:
                 self.direction = 1
