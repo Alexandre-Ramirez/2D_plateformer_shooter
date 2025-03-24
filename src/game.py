@@ -282,32 +282,44 @@ while run:
             #   arrow.draw(screen, menu.get_current().get_selected_widget())
     elif current_state == "game":
             #Afficher le jeu
-        if player1.move(False, False,True, False):
-            player1.update_action(2)
-        elif player1.move(True, False,False, True) or player1.move(False, True,False, True):
-            player1.update_action(1)
-        else:
-            player1.update_action(0)
+        #if player1.move(False, False,True, False):
+            #player1.update_action(2) #jump
+        #if player1.move(True, False,False, True) or player1.move(False, True,False, True):
+         #   player1.update_action(1) #moving
+        #else:
+         #   player1.update_action(0)
 
 
             # movements of the player
         key = pygame.key.get_pressed()
         moving = False
         moving_l = False
+        jumping = False
+        on_ground = True
 
-        if key[pygame.K_LEFT]:
-            screen_scroll = player1.move(True, False,False, True)
-        if key[pygame.K_RIGHT]:
-            screen_scroll = player1.move(False, True, False, True)
-        if key[pygame.K_UP] or key[pygame.K_SPACE]:
-            print("jump")
-            player1.move(True, False,True, False)
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    screen_scroll = player1.move(True, False,False, True)
+                    player1.update_action(1)  # moving
+                if event.key == pygame.K_RIGHT:
+                    screen_scroll = player1.move(False, True, False, True)
+                    player1.update_action(1) #moving
+                if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+                    print("jump")
+                    player1.move(True, False,True, False)
+                    player1.update_action(2) #jump
+
+            if event.type == pygame.KEYUP:
+                if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_SPACE]:
+                    player1.move(False, False,False, True)
+                    player1.update_action(0) #no move
 
         player1.update_animation()
         player1.reset()
 
-            # Ici, vous pouvez gérer la logique du jeu
-            # draw at the screen
+        # Ici, vous pouvez gérer la logique du jeu
+        # draw at the screen
         draw_bg(screen_scroll)
         # update background
         worlds.draw(screen_scroll)
